@@ -4,20 +4,12 @@ import argparse
 import json
 from pathlib import Path
 from time import perf_counter
-from typing import Mapping
+from typing import TYPE_CHECKING, Mapping
 
-import numpy as np
 from qiskit import QuantumCircuit
-from qiskit.primitives import StatevectorEstimator
-from scipy.optimize import minimize
 
-from ..pipeline import run_demo_pipeline
-from ..problem import PaymentProblem, QuboModel
-from ..quantum import (
-    build_warm_start_qaoa,
-    qubo_to_ising,
-    solve_continuous_relaxation,
-)
+if TYPE_CHECKING:
+    from ..problem import PaymentProblem, QuboModel
 from .iqm_backend import (
     backend_summary,
     connect_iqm_backend,
@@ -137,13 +129,20 @@ def prepare_current_cash_qaoa(
     if maxiter < 1:
         raise ValueError("maxiter must be positive")
 
-    pipeline = run_demo_pipeline(include_quantum=False, seed=seed)
-    scenario = next(
-        scenario
-        for scenario in pipeline.scenarios
-        if scenario.scenario_id == "current-cash"
+    # Keep the QPU runtime independent of the forecasting/scikit-learn stack.
+    # The current-cash scenario is exactly the base five-invoice problem.
+    import numpy as np
+    from qiskit.primitives import StatevectorEstimator
+    from scipy.optimize import minimize
+
+    from ..problem import build_example_problem
+    from ..quantum import (
+        build_warm_start_qaoa,
+        qubo_to_ising,
+        solve_continuous_relaxation,
     )
-    problem = scenario.to_payment_problem(pipeline.base_problem)
+
+    problem = build_example_problem()
     qubo = problem.build_qubo(penalty_gbp=penalty_gbp)
 
     started = perf_counter()
