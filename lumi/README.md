@@ -100,8 +100,10 @@ The job uses:
 - account `project_462001763`
 - reservation `quantumfinance`
 - partition `small`
-- CSC Qiskit module `fiqci-vtt-qiskit`
+- CSC Qiskit module `fiqci-vtt-qiskit/18.0`
 - device `radiance20`
+
+The regular CSC Qiskit module is intentional here: on LUMI it is the module documented for both Q20 and Q50, while the `hackathon/fiqci-vtt-qiskit-QxF/v1.0` module is specifically the Q50 hackathon environment. The script also verifies that `RUN_SETUP` and `Q20_CORTEX_URL` are populated before submitting any QPU work.
 
 The runner prints the IQM job ID immediately after submission and stores the counts and transpilation metrics under:
 
