@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import subprocess
+import sys
+
 import pytest
 
 from cherryq.hardware.iqm_backend import (
@@ -53,3 +56,12 @@ def test_hardware_counts_decode_exact_cherryq_plan() -> None:
     assert report["business_feasible_probability"] == pytest.approx(1.0)
     assert report["best_sampled_paid_invoice_ids"] == ("A", "B", "D")
     assert report["best_sampled_business_loss_gbp"] == 600
+
+
+def test_hardware_import_does_not_require_sklearn() -> None:
+    code = (
+        "import sys; "
+        "import cherryq.hardware.q20; "
+        "assert 'sklearn' not in sys.modules"
+    )
+    subprocess.run([sys.executable, "-c", code], check=True)
