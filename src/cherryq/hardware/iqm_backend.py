@@ -70,7 +70,22 @@ def connect_iqm_backend(device: str = "q20"):
 
 
 def _two_qubit_gate_count(circuit: QuantumCircuit) -> int:
-    return sum(1 for instruction in circuit.data if len(instruction.qubits) == 2)
+    """Count physical/logical two-qubit quantum operations, excluding directives.
+
+    Qiskit's measure_all() inserts a barrier. A two-qubit barrier touches two
+    qubits but is not an entangling gate and must not inflate this metric.
+    """
+    return sum(
+        1
+        for instruction in circuit.data
+        if len(instruction.qubits) == 2
+        and instruction.operation.name != "barrier"
+        and not bool(getattr(instruction.operation, "_directive", False))
+    )
+
+
+def _operation_counts(circuit: QuantumCircuit) -> dict[str, int]:
+    return {str(name): int(count) for name, count in circuit.count_ops().items()}
 
 
 def transpile_for_backend(
@@ -94,6 +109,8 @@ def transpile_for_backend(
         "transpiled_depth": int(compiled.depth()),
         "logical_two_qubit_gates": _two_qubit_gate_count(circuit),
         "transpiled_two_qubit_gates": _two_qubit_gate_count(compiled),
+        "logical_operation_counts": _operation_counts(circuit),
+        "transpiled_operation_counts": _operation_counts(compiled),
         "optimization_level": optimization_level,
     }
     return compiled, metrics
