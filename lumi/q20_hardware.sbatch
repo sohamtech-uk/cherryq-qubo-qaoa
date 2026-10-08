@@ -27,7 +27,7 @@ fi
 mkdir -p "$RESULT_ROOT"
 
 module use /appl/local/quantum/modulefiles
-module --ignore_cache load fiqci-vtt-qiskit-QxF
+module --ignore_cache load fiqci-vtt-qiskit
 export DEVICES=("radiance20")
 source "$RUN_SETUP"
 
