@@ -172,6 +172,37 @@ Optional IBM Quantum Runtime dependency:
 python -m pip install -e ".[hardware]"
 ```
 
+Optional IQM adapter for local development:
+
+```bash
+python -m pip install -e ".[iqm]"
+```
+
+## Aalto Q20 hardware path
+
+The public hackathon repository now includes a hardware runner for Aalto Q20. The intended sequence is deliberately conservative:
+
+1. submit a two-qubit Bell-pair sanity circuit
+2. save the IQM job ID and raw counts
+3. optimise CherryQ's `current-cash` warm-start-X `p=1` circuit classically/statevector
+4. freeze those parameters before QPU submission
+5. transpile for the live Q20 backend
+6. save raw counts, depth, two-qubit gate count, feasibility and optimal-plan probability
+
+On the hackathon LUMI environment, submit the Bell test first:
+
+```bash
+sbatch lumi/q20_hardware.sbatch bell
+```
+
+After that succeeds, submit the frozen CherryQ circuit:
+
+```bash
+sbatch lumi/q20_hardware.sbatch cherryq
+```
+
+The runner records the QPU job ID in stdout and in the JSON result. Hardware execution is kept separate from the classical optimiser so QPU time is not spent inside a blind variational optimisation loop.
+
 ## What is validated in code
 
 - exact business optimum and MILP agreement
@@ -185,13 +216,15 @@ python -m pip install -e ".[hardware]"
 - AI probabilities feed discrete cash scenarios rather than fractional expected cash
 - recommendation never spends forecast receipts before settlement
 - automated CI smoke-tests the full research harness
+- Q20/Q50 runtime identifiers and IQM environment validation
+- Bell-circuit construction and hardware-count decoding
 
 ## What still requires evidence
 
 1. Validate payment dependencies and deferral costs with real SME/accounting users.
 2. Replace synthetic forecasting history with anonymised, permissioned data.
 3. Run the full repeated-seed experiment at mentor-agreed optimiser budgets.
-4. Add noisy-simulator and hardware results only after simulator behaviour is understood.
+4. Record and compare real Q20/Q50 hardware results against the simulator baseline.
 5. Scale problem families and benchmark against strong classical optimisation.
 6. Treat any quantum-performance claim as unsupported until it survives those comparisons.
 
