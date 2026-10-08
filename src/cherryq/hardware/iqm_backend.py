@@ -133,6 +133,7 @@ def submit_and_collect(
 
     job = backend.run(circuit, shots=shots)
     job_id_value = job.job_id()
+    print(f"Submitted IQM job ID: {job_id_value}", flush=True)
     result = job.result()
     counts = result.get_counts()
 
