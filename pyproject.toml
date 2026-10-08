@@ -30,6 +30,7 @@ cherryq-demo = "cherryq.demo:main"
 cherryq-research = "cherryq.research:main"
 cherryq-q20 = "cherryq.hardware.q20:main"
 cherryq-scaling = "cherryq.scaling:main"
+cherryq-ten = "cherryq.ten_invoice:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
