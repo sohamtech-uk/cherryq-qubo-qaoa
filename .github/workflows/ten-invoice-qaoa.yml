@@ -1,0 +1,50 @@
+name: CherryQ 10-invoice QAOA benchmark
+
+on:
+  push:
+    branches:
+      - feature/10-invoice-scaling
+    paths:
+      - "src/cherryq/problem.py"
+      - "src/cherryq/quantum.py"
+      - "src/cherryq/scaling.py"
+      - "src/cherryq/ten_invoice.py"
+      - ".github/workflows/ten-invoice-qaoa.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  ten-invoice:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run 10-invoice ideal QAOA benchmark
+        run: |
+          python -m cherryq.ten_invoice \
+            --qaoa \
+            --maxiter 80 \
+            --shots 2048 \
+            --seed 42 \
+            --relaxation-multistart 32 \
+            --json-out ten-invoice-qaoa.json
+
+      - name: Upload benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherryq-ten-invoice-qaoa
+          path: ten-invoice-qaoa.json
+          if-no-files-found: error
