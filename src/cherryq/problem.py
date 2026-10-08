@@ -11,6 +11,7 @@ class Invoice:
     supplier: str
     amount_gbp: int
     deferral_loss_gbp: int
+    category: str = "Uncategorised"
 
 
 @dataclass(frozen=True)
@@ -327,6 +328,52 @@ def build_example_problem() -> PaymentProblem:
                 invoice_ids=("A", "B"),
                 loss_if_not_all_paid_gbp=900,
                 description="Both payments are required to keep a customer order moving",
+            ),
+        ),
+    )
+
+
+def build_ten_invoice_problem() -> PaymentProblem:
+    """Return the first CherryQ scaling case with 10 SME supplier invoices.
+
+    This case is deliberately still small enough for exact enumeration (2^10
+    business decisions), while introducing a second supplier dependency and a
+    larger cash-allocation problem. It is designed as a bridge between the
+    five-invoice hardware proof and the later 20-50 invoice benchmarks.
+    """
+
+    return PaymentProblem(
+        cleared_cash_gbp=12000,
+        protected_cash_gbp=7000,
+        budget_unit_gbp=500,
+        invoices=(
+            Invoice("A", "Materials supplier", 1500, 100, "Revenue-critical"),
+            Invoice("B", "Delivery partner", 1000, 100, "Fulfilment-critical"),
+            Invoice("C", "Equipment hire", 1000, 350, "Business continuity"),
+            Invoice("D", "IT support", 500, 100, "Business continuity"),
+            Invoice("E", "Packaging supplier", 1500, 250, "Fulfilment-critical"),
+            Invoice("F", "Key stock replenishment", 1000, 300, "Revenue-critical"),
+            Invoice("G", "Warehouse utilities", 1000, 400, "Business continuity"),
+            Invoice("H", "Priority courier capacity", 500, 150, "Fulfilment-critical"),
+            Invoice("I", "Compliance software", 500, 200, "Penalty-sensitive"),
+            Invoice("J", "Marketing services", 500, 50, "Deferrable"),
+        ),
+        dependencies=(
+            PaymentDependency(
+                invoice_ids=("A", "B"),
+                loss_if_not_all_paid_gbp=900,
+                description=(
+                    "Materials and delivery are both needed to keep a customer "
+                    "order moving"
+                ),
+            ),
+            PaymentDependency(
+                invoice_ids=("F", "H"),
+                loss_if_not_all_paid_gbp=700,
+                description=(
+                    "Priority stock replenishment only protects revenue when "
+                    "courier capacity is also secured"
+                ),
             ),
         ),
     )
