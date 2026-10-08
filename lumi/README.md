@@ -17,7 +17,7 @@ The most useful immediate target is **LUMI-C CPU compute** for the QAOA research
 - all cash scenarios
 - future penalty and larger-problem sweeps
 
-Do **not** assume LUMI-G will accelerate the current Qiskit path. LUMI-G uses AMD MI250x/ROCm GPUs, while the standard Qiskit Aer GPU packages target NVIDIA CUDA. Use the GPU allocation later for ROCm-native AI workloads such as PyTorch cash-flow/payment-probability models.
+For the current eight-qubit CherryQ problem, CPU/statevector work is already sufficient. The hackathon environment also provides event-specific Qiskit tooling for LUMI-G, so GPU simulation can be tested later when the problem size justifies it rather than being ruled out by the generic CUDA packaging path.
 
 ## 1. Put the repository on LUMI
 
@@ -85,7 +85,39 @@ Results are written to:
 /scratch/project_462001763/cherryq/results/<array-job-id>/
 ```
 
-## 4. Monitor utilisation
+## 4. Run the Q20 sanity test and CherryQ hardware circuit
+
+The hackathon Q20 path uses the event reservation and module already configured in `lumi/q20_hardware.sbatch`.
+
+First run the Bell-pair sanity test:
+
+```bash
+sbatch lumi/q20_hardware.sbatch bell
+```
+
+The job uses:
+
+- account `project_462001763`
+- reservation `quantumfinance`
+- partition `small`
+- event module `fiqci-vtt-qiskit-QxF`
+- device `radiance20`
+
+The runner prints the IQM job ID immediately after submission and stores the counts and transpilation metrics under:
+
+```text
+/scratch/project_462001763/cherryq/q20/
+```
+
+Only after the Bell test succeeds, run:
+
+```bash
+sbatch lumi/q20_hardware.sbatch cherryq
+```
+
+That command prepares the `current-cash` CherryQ instance with penalty £500, warm-start-X and `p=1`, freezes the statevector-optimised parameters, transpiles the resulting eight-qubit circuit for Q20, submits it once, and records the raw hardware metrics.
+
+## 5. Monitor utilisation
 
 ```bash
 squeue -u "$USER"
@@ -97,7 +129,7 @@ scontrol show partition small
 
 Start small, inspect utilisation, then increase the matrix only if the jobs are actually using the requested resources efficiently.
 
-## 5. Aggregate the shards
+## 6. Aggregate the shards
 
 After the array has finished:
 
@@ -113,7 +145,7 @@ The aggregate report is written to:
 
 It reports mean and standard deviation of optimal-plan probability, feasibility, sampled gap, runtime and circuit complexity by scenario/method/depth.
 
-## 6. When to move beyond the small partition
+## 7. When to move beyond the small partition
 
 The current five-invoice model is still small. LUMI is designed for scale-out workloads, and the `small` partition is the correct place for this pilot.
 
@@ -127,7 +159,7 @@ The next scientifically useful step is to create larger generated invoice proble
 
 Only move to the full-node `standard` partition after an individual workload can use a 128-core LUMI-C node efficiently.
 
-## 7. GPU plan
+## 8. GPU plan
 
 LUMI-G should be used for workloads that are actually ROCm-capable.
 
@@ -139,7 +171,7 @@ For CherryQ, the sensible GPU track is:
 4. compare calibration and temporal holdout performance
 5. scale to larger synthetic or permissioned transaction data
 
-Do not spend GPU hours on the current Qiskit simulator simply to say we used a GPU.
+The event-provided Qiskit GPU container can be used for larger Aer experiments. For the current small model, prefer the CPU harness unless profiling shows a real benefit.
 
 ## Resource discipline
 
