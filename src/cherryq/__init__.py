@@ -21,6 +21,7 @@ _EXPORTS = {
     "PaymentSolution": ("problem", "PaymentSolution"),
     "QuboModel": ("problem", "QuboModel"),
     "build_example_problem": ("problem", "build_example_problem"),
+    "build_ten_invoice_problem": ("problem", "build_ten_invoice_problem"),
     "CherryQRecommendation": ("recommendation", "CherryQRecommendation"),
     "ScenarioPlan": ("recommendation", "ScenarioPlan"),
     "build_explainable_recommendation": (
