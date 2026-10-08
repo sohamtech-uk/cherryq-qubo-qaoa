@@ -38,5 +38,5 @@ python -u -m cherryq.hardware.q20_ten \
   --penalty 250 \
   --relaxation-multistart 32
 
-echo "PRELIGHT_DIR=$RUN_DIR"
+echo "PREFLIGHT_DIR=$RUN_DIR"
 echo "MANIFEST=$RUN_DIR/ten-invoice-q20-preflight.json"
