@@ -1,6 +1,9 @@
+import sys
+
 from cherryq.classical import benchmark_classical
 from cherryq.problem import build_ten_invoice_problem
 from cherryq.scaling import benchmark_problem
+from cherryq.hardware.q20_ten import prepare_ten_invoice_qaoa
 
 
 def test_ten_invoice_exact_and_milp_optimum_agree():
@@ -48,3 +51,21 @@ def test_ten_invoice_categories_cover_business_roles():
         "Penalty-sensitive",
         "Deferrable",
     }.issubset(categories)
+
+
+def test_ten_invoice_q20_preparation_is_14_qubits_and_sklearn_free():
+    sys.modules.pop("sklearn", None)
+
+    circuit, qubo, problem, metadata = prepare_ten_invoice_qaoa(
+        penalty_gbp=250,
+        p=1,
+        seed=42,
+        maxiter=2,
+        relaxation_multistart=1,
+    )
+
+    assert circuit.num_qubits == 14
+    assert len(qubo.variable_names) == 14
+    assert problem.solve_exact().paid_invoice_ids == ("A", "B", "F", "G", "H")
+    assert len(metadata["optimized_parameters"]) == 2
+    assert "sklearn" not in sys.modules
