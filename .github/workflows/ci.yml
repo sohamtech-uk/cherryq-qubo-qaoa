@@ -1,0 +1,73 @@
+name: CherryQ prototype
+
+on:
+  push:
+    paths:
+      - "**"
+      - ".github/workflows/ci.yml"
+  pull_request:
+    paths:
+      - "**"
+      - ".github/workflows/ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: pyproject.toml
+
+      - name: Install prototype dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Run unit tests
+        run: pytest -q
+
+      - name: Run classical and AI smoke demo
+        run: python -m cherryq.demo --skip-quantum
+
+      - name: Run all-scenario QAOA smoke benchmark
+        run: python -m cherryq.demo --maxiter 8 --shots 256
+
+      - name: Run penalty and mixer research smoke
+        run: |
+          python -m cherryq.research             --scenario current-cash             --penalties 100,500,2000             --methods standard,warm-start-x,warm-start             --p 1             --seeds 11,29             --maxiter 8             --shots 256             --relaxation-multistart 8             --warm-start-jitter 0.02             --json-out research-smoke.json
+
+      - name: Upload CherryQ research smoke report
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherryq-research-smoke
+          path: research-smoke.json
+          if-no-files-found: error
+
+      - name: Run mentor-facing repeated-seed benchmark
+        run: |
+          python -m cherryq.research \
+            --scenario current-cash \
+            --penalties 100,250,500,1000,2000,4000 \
+            --methods standard,warm-start-x,warm-start \
+            --p 1,2 \
+            --seeds 11,29,47,71,97 \
+            --maxiter 80 \
+            --shots 2048 \
+            --relaxation-multistart 32 \
+            --warm-start-jitter 0.05 \
+            --json-out research-mentor.json
+
+      - name: Upload CherryQ mentor benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherryq-research-mentor
+          path: research-mentor.json
+          if-no-files-found: error
