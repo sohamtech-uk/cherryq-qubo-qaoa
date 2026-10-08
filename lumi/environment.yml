@@ -1,0 +1,11 @@
+name: cherryq
+channels:
+  - conda-forge
+dependencies:
+  - python=3.12
+  - "numpy>=2,<3"
+  - "scipy>=1.14,<2"
+  - "scikit-learn>=1.6,<2"
+  - pip
+  - pip:
+      - "qiskit>=2.5.2,<3"
