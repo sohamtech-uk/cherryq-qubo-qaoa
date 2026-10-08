@@ -37,6 +37,16 @@ jobs:
       - name: Run classical and AI smoke demo
         run: python -m cherryq.demo --skip-quantum
 
+      - name: Run 5-to-10 invoice scaling benchmark
+        run: python -m cherryq.scaling --json-out scaling-5-vs-10.json
+
+      - name: Upload scaling benchmark
+        uses: actions/upload-artifact@v4
+        with:
+          name: cherryq-scaling-5-vs-10
+          path: scaling-5-vs-10.json
+          if-no-files-found: error
+
       - name: Run all-scenario QAOA smoke benchmark
         run: python -m cherryq.demo --maxiter 8 --shots 256
 
