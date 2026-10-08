@@ -100,7 +100,7 @@ The job uses:
 - account `project_462001763`
 - reservation `quantumfinance`
 - partition `small`
-- event module `fiqci-vtt-qiskit-QxF`
+- CSC Qiskit module `fiqci-vtt-qiskit`
 - device `radiance20`
 
 The runner prints the IQM job ID immediately after submission and stores the counts and transpilation metrics under:
