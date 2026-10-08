@@ -27,9 +27,11 @@ fi
 mkdir -p "$RESULT_ROOT"
 
 module use /appl/local/quantum/modulefiles
-module --ignore_cache load fiqci-vtt-qiskit
+module --ignore_cache load fiqci-vtt-qiskit/18.0
 export DEVICES=("radiance20")
+: "${RUN_SETUP:?RUN_SETUP was not set by fiqci-vtt-qiskit/18.0}"
 source "$RUN_SETUP"
+: "${Q20_CORTEX_URL:?Q20_CORTEX_URL was not configured for radiance20}"
 
 export PYTHONPATH="${REPO_ROOT}/src"
 
