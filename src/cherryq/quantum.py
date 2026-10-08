@@ -52,6 +52,7 @@ class QaoaRunResult:
     optimizer_runtime_ms: float
     total_runtime_ms: float
     optimized_expected_qubo_energy: float
+    optimized_parameters: tuple[float, ...]
     best_sampled_qubo_energy: float
     best_sampled_business_loss_gbp: int | None
     best_sampled_paid_invoice_ids: tuple[str, ...]
@@ -77,6 +78,7 @@ class QaoaRunResult:
             "optimizer_runtime_ms": self.optimizer_runtime_ms,
             "total_runtime_ms": self.total_runtime_ms,
             "optimized_expected_qubo_energy": self.optimized_expected_qubo_energy,
+            "optimized_parameters": self.optimized_parameters,
             "best_sampled_qubo_energy": self.best_sampled_qubo_energy,
             "best_sampled_business_loss_gbp": self.best_sampled_business_loss_gbp,
             "best_sampled_paid_invoice_ids": self.best_sampled_paid_invoice_ids,
@@ -469,6 +471,7 @@ def run_qaoa(
         optimizer_runtime_ms=float(optimizer_runtime_ms),
         total_runtime_ms=float(total_runtime_ms),
         optimized_expected_qubo_energy=original_expected_energy,
+        optimized_parameters=tuple(float(value) for value in result.x),
         best_sampled_qubo_energy=float(metrics["best_sampled_qubo_energy"]),
         best_sampled_business_loss_gbp=metrics["best_sampled_business_loss_gbp"],
         best_sampled_paid_invoice_ids=metrics["best_sampled_paid_invoice_ids"],
