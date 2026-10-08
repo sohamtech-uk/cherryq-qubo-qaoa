@@ -8,6 +8,7 @@ import pytest
 from cherryq.hardware.iqm_backend import (
     Q20,
     Q50,
+    _two_qubit_gate_count,
     connect_iqm_backend,
     get_iqm_device_config,
 )
@@ -41,6 +42,8 @@ def test_bell_circuit_has_measurements() -> None:
     assert circuit.num_qubits == 2
     assert circuit.num_clbits == 2
     assert circuit.count_ops()["measure"] == 2
+    assert circuit.count_ops()["barrier"] == 1
+    assert _two_qubit_gate_count(circuit) == 1
 
 
 def test_hardware_counts_decode_exact_cherryq_plan() -> None:
