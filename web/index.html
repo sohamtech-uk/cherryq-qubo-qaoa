@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#090d1c" />
+  <meta name="description" content="CherryQ — quantum-AI treasury optimisation for SME supplier payments, demonstrated on Aalto Q20." />
+  <title>CherryQ — Quantum treasury optimisation</title>
+  <link rel="icon" href="/cherrymoney-logo.png" />
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="CherryQ home">
+      <span class="logo-shell"><img src="/cherrymoney-logo.png" alt="Cherry Money" /></span>
+      <span class="brand-copy"><strong>CherryQ</strong><small>Quantum treasury optimiser</small></span>
+    </a>
+    <nav>
+      <a href="#demo">Demo</a>
+      <a href="#evidence">Evidence</a>
+      <a href="#why-quantum">Why quantum</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+    <span class="hardware-pill"><i></i> Aalto Q20 verified</span>
+  </header>
+
+  <main id="top">
+    <section class="hero shell">
+      <div class="hero-copy">
+        <p class="eyebrow">Quantum × Finance Hackathon 2026</p>
+        <h1>Which supplier invoices should an SME <span>pay today?</span></h1>
+        <p class="lead">CherryQ protects payroll, tax and reserves first — then finds the supplier-payment combination with the lowest business impact.</p>
+        <div class="hero-actions">
+          <a class="button primary" href="#demo">Run the demo</a>
+          <a class="button ghost" href="#evidence">See Q20 evidence</a>
+        </div>
+        <div class="claim">
+          <strong>What we claim</strong>
+          <span>Verified business optimisation executed end-to-end on real superconducting quantum hardware.</span>
+          <em>No quantum advantage claimed.</em>
+        </div>
+      </div>
+      <div class="hero-visual" aria-label="CherryQ flow">
+        <div class="orbit orbit-one"></div>
+        <div class="orbit orbit-two"></div>
+        <div class="quantum-core">
+          <span>Q</span>
+          <small>8 logical<br/>qubits</small>
+        </div>
+        <div class="node n1"><b>£8k</b><span>cash</span></div>
+        <div class="node n2"><b>£5k</b><span>protected</span></div>
+        <div class="node n3"><b>£3k</b><span>to allocate</span></div>
+        <div class="node n4"><b>A+B+D</b><span>optimal plan</span></div>
+      </div>
+    </section>
+
+    <section id="demo" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Interactive business case</p>
+        <h2>Five invoices. £3,000 available. One decision.</h2>
+        <p>We keep the hackathon case intentionally small so exact enumeration and MILP can independently verify every answer.</p>
+      </div>
+
+      <div class="cash-strip">
+        <div><span>Cleared cash</span><strong>£8,000</strong></div>
+        <div class="operator">−</div>
+        <div><span>Protected cash</span><strong>£5,000</strong><small>payroll · tax · reserve</small></div>
+        <div class="operator">=</div>
+        <div class="highlight"><span>Supplier budget</span><strong>£3,000</strong></div>
+      </div>
+
+      <div class="invoice-grid" id="invoice-grid">
+        <article class="invoice revenue" data-id="A">
+          <div class="invoice-top"><span class="letter">A</span><span class="tag">Revenue-critical</span></div>
+          <h3>Materials supplier</h3><div class="invoice-numbers"><b>£1,500</b><span>defer loss £100</span></div>
+        </article>
+        <article class="invoice fulfilment" data-id="B">
+          <div class="invoice-top"><span class="letter">B</span><span class="tag">Fulfilment-critical</span></div>
+          <h3>Delivery partner</h3><div class="invoice-numbers"><b>£1,000</b><span>defer loss £100</span></div>
+        </article>
+        <article class="invoice continuity" data-id="C">
+          <div class="invoice-top"><span class="letter">C</span><span class="tag">Business continuity</span></div>
+          <h3>Equipment hire</h3><div class="invoice-numbers"><b>£1,000</b><span>defer loss £350</span></div>
+        </article>
+        <article class="invoice continuity" data-id="D">
+          <div class="invoice-top"><span class="letter">D</span><span class="tag">Business continuity</span></div>
+          <h3>IT support</h3><div class="invoice-numbers"><b>£500</b><span>defer loss £100</span></div>
+        </article>
+        <article class="invoice deferrable" data-id="E">
+          <div class="invoice-top"><span class="letter">E</span><span class="tag">More deferrable</span></div>
+          <h3>Packaging supplier</h3><div class="invoice-numbers"><b>£1,500</b><span>defer loss £250</span></div>
+        </article>
+      </div>
+
+      <div class="dependency">
+        <div class="dep-icon">A ↔ B</div>
+        <div><strong>Operational dependency</strong><span>If both A and B are deferred, add £900 modelled loss because the customer order cannot move.</span></div>
+      </div>
+
+      <div class="run-panel">
+        <button id="run-button" class="button primary run-button"><span>Optimise payment plan</span><i></i></button>
+        <p>AI receipt scenarios → dependency-aware QUBO → exact/MILP benchmark → QAOA evidence</p>
+      </div>
+
+      <div id="result" class="result-card" aria-live="polite">
+        <div class="result-status"><span class="check">✓</span><div><small>Recommended now</small><h3>Pay A + B + D</h3></div></div>
+        <div class="result-stats">
+          <div><span>Supplier spend</span><strong>£3,000</strong></div>
+          <div><span>Protected cash</span><strong>£5,000</strong></div>
+          <div><span>Minimum modelled loss</span><strong>£600</strong></div>
+        </div>
+        <div class="explain">
+          <strong>Why this combination?</strong>
+          <p>A and B protect a revenue/fulfilment dependency, while D preserves business continuity. The result is the lowest verified loss within the £3,000 budget.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section math-section">
+      <div class="shell split">
+        <div>
+          <p class="eyebrow">Mathematical model</p>
+          <h2>A business decision that maps naturally to QUBO.</h2>
+          <p class="muted">Each invoice is binary: pay or defer. Pairwise supplier dependencies create quadratic interactions; cash becomes a constraint.</p>
+          <div class="mapping">
+            <span>Business problem</span><b>→</b><span>QUBO</span><b>→</b><span>Ising</span><b>→</b><span>QAOA</span>
+          </div>
+        </div>
+        <div class="formula-card">
+          <div><small>Decision</small><code>x<sub>i</sub> ∈ {0,1}</code><p>1 = pay · 0 = defer</p></div>
+          <div><small>Objective</small><code>min Σ c<sub>i</sub>(1−x<sub>i</sub>) + Σ d<sub>ij</sub>(1−x<sub>i</sub>)(1−x<sub>j</sub>)</code></div>
+          <div><small>Budget</small><code>Σ a<sub>i</sub>x<sub>i</sub> ≤ B</code></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Physical hardware evidence</p>
+        <h2>The correct payment plan survived onto Aalto Q20.</h2>
+        <p>We froze the statevector-optimised parameters first. The QPU performed no variational optimisation.</p>
+      </div>
+
+      <div class="evidence-grid">
+        <div class="evidence-card">
+          <div class="card-title"><span class="dot green"></span><strong>Verified ground truth</strong></div>
+          <p>Exact enumeration and MILP independently agree.</p>
+          <div class="big-result">A + B + D</div>
+          <div class="mini-pair"><span>Spend <b>£3,000</b></span><span>Loss <b>£600</b></span></div>
+        </div>
+        <div class="evidence-card quantum">
+          <div class="card-title"><span class="dot cyan"></span><strong>Aalto Q20 · 1,000 shots</strong></div>
+          <p>Physical superconducting QPU, frozen warm-start-X p=1 circuit.</p>
+          <div class="big-result">48 shots <small>4.8%</small></div>
+          <div class="mini-pair"><span>8 logical qubits</span><span>95 CZ · depth 120</span></div>
+        </div>
+      </div>
+
+      <div class="comparison">
+        <div class="comparison-head"><strong>Same frozen circuit</strong><span>Ideal statevector</span><span>Physical Q20</span></div>
+        <div class="metric-row"><b>P(A+B+D)</b><div class="bar-cell"><i style="--w:23.406%"></i><span>23.41%</span></div><div class="bar-cell q20"><i style="--w:4.8%"></i><span>4.80%</span></div></div>
+        <div class="metric-row"><b>Business feasible</b><div class="bar-cell"><i style="--w:82.031%"></i><span>82.03%</span></div><div class="bar-cell q20"><i style="--w:85.7%"></i><span>85.70%</span></div></div>
+        <div class="metric-row"><b>QUBO feasible</b><div class="bar-cell"><i style="--w:27.041%"></i><span>27.04%</span></div><div class="bar-cell q20"><i style="--w:13.3%"></i><span>13.30%</span></div></div>
+        <div class="metric-row"><b>Exact QUBO state</b><div class="bar-cell"><i style="--w:13.062%"></i><span>13.06%</span></div><div class="bar-cell q20"><i style="--w:.6%"></i><span>0.60%</span></div></div>
+      </div>
+
+      <div class="hardware-receipt">
+        <div><small>Slurm</small><strong>22651111 · COMPLETED</strong></div>
+        <div><small>IQM</small><strong>01a11ccf…26b0 · DONE</strong></div>
+        <div><small>Frozen parameters</small><strong>γ −0.52586 · β 0.26168</strong></div>
+        <div><small>Execution</small><strong>1.361 s QPU · 31 s Slurm</strong></div>
+      </div>
+      <p class="disclaimer"><b>Interpretation:</b> CherryQ recovered the verified best business decision on real hardware. The probability fell from 23.41% ideal to 4.8% physical as the circuit grew to 95 CZ gates / depth 120. This demonstrates physical execution — not quantum advantage.</p>
+    </section>
+
+    <section id="why-quantum" class="section quantum-why">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow">Why quantum?</p>
+          <h2>Not because five invoices are hard.</h2>
+          <p>Five invoices are our verifiable laboratory. The research question starts when binary choices, dependencies and receipt scenarios scale together.</p>
+        </div>
+
+        <div class="scale-layout">
+          <div class="scale-chart">
+            <div class="scale-row"><span><b>5</b> invoices</span><div><i style="--w:8%"></i></div><strong>32</strong></div>
+            <div class="scale-row"><span><b>20</b> invoices</span><div><i style="--w:38%"></i></div><strong>1,048,576</strong></div>
+            <div class="scale-row"><span><b>40</b> invoices</span><div><i style="--w:72%"></i></div><strong>~1.1 trillion</strong></div>
+            <div class="scale-row"><span><b>50</b> invoices</span><div><i style="--w:100%"></i></div><strong>~1.12 quadrillion</strong></div>
+          </div>
+          <div class="why-card">
+            <h3>Our hypothesis</h3>
+            <p>Payment decisions are binary, supplier dependencies are quadratic, and cash constraints map naturally to QUBO.</p>
+            <ul>
+              <li>Invoice = binary decision</li>
+              <li>Dependency = quadratic interaction</li>
+              <li>Budget + timing = penalties</li>
+            </ul>
+            <div class="warning">Classical optimisation remains the benchmark — and may remain better for many instances.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="section shell">
+      <div class="section-heading">
+        <p class="eyebrow">Business roadmap</p>
+        <h2>From a fully verified toy case to treasury optimisation.</h2>
+      </div>
+      <div class="roadmap">
+        <div class="road active"><span>Now</span><strong>5 invoices</strong><p>Exact + MILP + ideal QAOA + physical Q20</p></div>
+        <div class="road"><span>Next</span><strong>40–50 invoices</strong><p>Realistic SME categories, dependencies and receipt scenarios</p></div>
+        <div class="road"><span>Product</span><strong>SME treasury</strong><p>Explainable recommendations using permissioned finance data</p></div>
+        <div class="road"><span>Future</span><strong>Enterprise</strong><p>Multi-entity, larger payable networks and working-capital constraints</p></div>
+      </div>
+      <div class="value-strip">
+        <span>Reduce late fees & lost discounts</span>
+        <span>Protect revenue-critical supplier flows</span>
+        <span>Avoid operational disruption from dependent invoices</span>
+        <span>Give finance teams an auditable reason for each deferral</span>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell footer-inner">
+      <div class="brand footer-brand"><span class="logo-shell"><img src="/cherrymoney-logo.png" alt="" /></span><span class="brand-copy"><strong>CherryQ</strong><small>by Cherry Money</small></span></div>
+      <p>Quantum × Finance Hackathon 2026 · Real Q20 evidence · No quantum advantage claimed.</p>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
