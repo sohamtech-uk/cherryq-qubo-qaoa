@@ -21,10 +21,14 @@ dev = [
 hardware = [
   "qiskit-ibm-runtime>=0.47,<1",
 ]
+iqm = [
+  "iqm-client[qiskit]",
+]
 
 [project.scripts]
 cherryq-demo = "cherryq.demo:main"
 cherryq-research = "cherryq.research:main"
+cherryq-q20 = "cherryq.hardware.q20:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
