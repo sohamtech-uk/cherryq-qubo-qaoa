@@ -17,7 +17,10 @@ The five-invoice QPU results have not been rerun or modified.
   that test is not evidence of actual Q20 routing.
 
 The uploaded audit's historical Q20 reference remains **300 CZ, depth 283**.
-No newer Q20 metrics have been measured by this checkpoint. **NO-GO remains.**
+Live-target routing is now verified by CPU-only Slurm job **22664032** for
+all six schedule/seed pairs. See [the completed audit](evidence/lumi-cost-order-22664032/README.md).
+No QPU job was submitted. **NO-GO for a physical run remains pending a
+calibrated/noisy-performance review**, rather than because routing is unverified.
 
 ## Comparison protocol
 
