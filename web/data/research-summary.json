@@ -1,75 +1,163 @@
 {
-  "generated_from": "feature/resonance-mock-comparison",
-  "ten_invoice": {
-    "exact_milp": {
-      "optimum": [
-        "A",
-        "B",
-        "F",
-        "G",
-        "H"
-      ],
-      "spend_gbp": 5000,
-      "minimum_loss_gbp": 950
+  "updated_at": "2026-10-09",
+  "claims": {
+    "quantum_advantage_claimed": false,
+    "classical_remains_benchmark": true,
+    "summary": "CherryQ has verified classical ground truth, representative noisy simulation and real hardware evidence on Aalto Q20, IQM Garnet and VTT Q50."
+  },
+  "five_invoice": {
+    "ground_truth": {
+      "optimal_plan": ["A", "B", "D"],
+      "spend_gbp": 3000,
+      "minimum_loss_gbp": 600
     },
     "ideal": {
-      "optimal_business_plan_probability": 0.034683,
-      "business_feasible_probability": 0.75269,
-      "qubo_feasible_probability": 0.134943,
-      "optimal_qubo_state_probability": 0.014739
+      "optimal_business_plan_probability": 0.23406
     },
-    "resonance_mock": {
-      "backend": "garnet:mock",
-      "facade": "facade_garnet",
-      "noisy_runs": 18,
-      "total_shots": 96000,
-      "pooled_10000_shot_runs": {
-        "original": {
-          "optimal_business_plan_probability": 0.008133,
-          "business_feasible_probability": 0.7338,
-          "qubo_feasible_probability": 0.078633,
-          "optimal_qubo_state_probability": 0.0017
-        },
-        "reordered": {
-          "optimal_business_plan_probability": 0.008,
-          "business_feasible_probability": 0.7242,
-          "qubo_feasible_probability": 0.0757,
-          "optimal_qubo_state_probability": 0.001667
-        }
-      },
-      "every_run_recovered_minimum_loss": true,
-      "note": "Representative IQM Garnet noisy simulation; not exact Aalto Q20 calibration."
-    },
-    "aalto_q20_routing": {
-      "logical_qubits": 14,
-      "logical_cx": 182,
-      "minimum_physical_cz": 298,
-      "qpu_submitted": false
-    }
-  },
-  "five_invoice_real_q20": {
-    "optimum": [
-      "A",
-      "B",
-      "D"
-    ],
-    "minimum_loss_gbp": 600,
-    "runs": [
+    "aalto_q20_runs": [
       {
+        "slurm_job_id": "22651111",
+        "iqm_job_id": "01a11ccf-b3aa-73b2-9b0f-4f89ea6226b0",
         "shots": 1000,
-        "optimal_plan_probability": 0.048,
         "optimal_plan_shots": 48,
-        "cz": 95,
-        "depth": 120
+        "optimal_business_plan_probability": 0.048,
+        "best_sampled_business_loss_gbp": 600,
+        "physical_depth": 120,
+        "cz_count": 95
       },
       {
+        "slurm_job_id": "22651533",
+        "iqm_job_id": "01a11ce6-7601-7dd0-a7eb-5cb95db0ee41",
         "shots": 1000,
-        "optimal_plan_probability": 0.054,
         "optimal_plan_shots": 54,
-        "cz": 79,
-        "depth": 111
+        "optimal_business_plan_probability": 0.054,
+        "best_sampled_business_loss_gbp": 600,
+        "physical_depth": 111,
+        "cz_count": 79
       }
     ]
   },
-  "claim": "No quantum advantage claimed."
+  "ten_invoice": {
+    "ground_truth": {
+      "optimal_plan": ["A", "B", "F", "G", "H"],
+      "spend_gbp": 5000,
+      "minimum_loss_gbp": 950,
+      "exact_and_milp_agree": true
+    },
+    "traditional_greedy": {
+      "selected_plan": ["C", "D", "F", "G", "H", "I", "J"],
+      "spend_gbp": 5000,
+      "business_loss_gbp": 1350,
+      "gap_to_optimum_gbp": 400,
+      "loss_reduction_from_greedy_percent": 29.6296
+    },
+    "frozen_qaoa": {
+      "gamma": -0.7439674535854706,
+      "beta": 0.3004519607226279,
+      "p": 1,
+      "logical_qubits": 14,
+      "parameters_reoptimized_for_hardware": false
+    },
+    "ideal": {
+      "original": {
+        "optimal_business_plan_probability": 0.03468328267256881,
+        "business_feasible_probability": 0.752690106466112,
+        "qubo_feasible_probability": 0.1349429988633793,
+        "optimal_qubo_probability": 0.01473939119493527,
+        "logical_depth": 78,
+        "logical_two_qubit_gates": 182
+      },
+      "reordered": {
+        "optimal_business_plan_probability": 0.03468328267256875,
+        "business_feasible_probability": 0.7526901064661118,
+        "qubo_feasible_probability": 0.13494299886337924,
+        "optimal_qubo_probability": 0.01473939119493524,
+        "logical_depth": 42,
+        "logical_two_qubit_gates": 182
+      }
+    },
+    "garnet_mock": {
+      "description": "Representative IQM Garnet noisy facade simulation, not an exact Aalto or Q50 calibration model.",
+      "noisy_runs": 18,
+      "total_noisy_shots": 96000,
+      "pooled_shots_per_schedule": 30000,
+      "original": {
+        "optimal_business_plan_probability": 0.008133333333333333,
+        "business_feasible_probability": 0.7338,
+        "qubo_feasible_probability": 0.07863333333333334,
+        "optimal_qubo_probability": 0.0017,
+        "best_sampled_business_loss_gbp": 950
+      },
+      "reordered": {
+        "optimal_business_plan_probability": 0.008,
+        "business_feasible_probability": 0.7242,
+        "qubo_feasible_probability": 0.0757,
+        "optimal_qubo_probability": 0.0016666666666666668,
+        "best_sampled_business_loss_gbp": 950
+      }
+    },
+    "real_garnet": {
+      "iqm_job_id": "01a12051-58d8-7226-87ed-795caff11d3d",
+      "shots_per_circuit": 1000,
+      "original": {
+        "optimal_plan_shots": 0,
+        "optimal_business_plan_probability": 0.0,
+        "business_feasible_probability": 0.844,
+        "qubo_feasible_probability": 0.051,
+        "optimal_qubo_probability": 0.0,
+        "best_sampled_business_loss_gbp": 1000,
+        "physical_depth": 348,
+        "cz_count": 284,
+        "single_qubit_gate_count": 753
+      },
+      "reordered": {
+        "optimal_plan_shots": 2,
+        "optimal_business_plan_probability": 0.002,
+        "business_feasible_probability": 0.797,
+        "qubo_feasible_probability": 0.04,
+        "optimal_qubo_probability": 0.0,
+        "best_sampled_business_loss_gbp": 950,
+        "physical_depth": 249,
+        "cz_count": 289,
+        "single_qubit_gate_count": 776
+      }
+    },
+    "aalto_q20": {
+      "routing_audit_passed": true,
+      "minimum_routed_cz_count": 298,
+      "physical_hardware_run_submitted": false,
+      "final_preflight": "NO-GO",
+      "reason": "The resolved radiance20 device identity could not be independently verified."
+    },
+    "real_vtt_q50": {
+      "iqm_job_id": "07ef2341-74f4-4b6f-a861-b2520a214077",
+      "slurm_job_id": "22670889",
+      "usable_qubits": 52,
+      "shots_per_circuit": 1000,
+      "original": {
+        "optimal_plan_shots": 1,
+        "optimal_business_plan_probability": 0.001,
+        "business_feasible_probability": 0.924,
+        "qubo_feasible_probability": 0.057,
+        "optimal_qubo_probability": 0.0,
+        "best_sampled_business_loss_gbp": 950,
+        "physical_depth": 366,
+        "cz_count": 297,
+        "single_qubit_gate_count": 742
+      },
+      "reordered": {
+        "optimal_plan_shots": 2,
+        "optimal_business_plan_probability": 0.002,
+        "business_feasible_probability": 0.851,
+        "qubo_feasible_probability": 0.043,
+        "optimal_qubo_probability": 0.0,
+        "best_sampled_business_loss_gbp": 950,
+        "physical_depth": 222,
+        "cz_count": 281,
+        "single_qubit_gate_count": 769
+      },
+      "statistical_assessment": "No convincing evidence of better optimum sampling than the prior Garnet batch; Fisher and Holm-adjusted p-values were 1.0.",
+      "ems_run": false
+    }
+  }
 }
