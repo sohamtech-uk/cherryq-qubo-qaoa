@@ -1,0 +1,144 @@
+{
+  "experiment": "10-invoice-cost-order-routing-audit",
+  "created_at_utc": "2026-10-09T07:20:16.029640+00:00",
+  "source_commit": "02feb6addb62f9a3419c8f319fd0fe90825953a3",
+  "source_worktree_dirty": false,
+  "source_sha256": {
+    "src/cherryq/hardware/q20_routing_audit.py": "32432dc3af6bbb247367b1b762b48b8fba42cf7b87260c9094f4b172ba103e17",
+    "src/cherryq/quantum.py": "80f8bbd6defc1ddc1b9008877c11bf8b792a6f35df2d9a5eac226835c0f5b4a0",
+    "src/cherryq/hardware/q20_ten.py": "02d42bd7c25b9fb97a6fa9fcbcc0dd810f3700bc8541a2f7e090d84ed0e5791d"
+  },
+  "versions": {
+    "qiskit": "2.5.2",
+    "numpy": "2.3.5",
+    "scipy": "1.17.0",
+    "iqm-client": null,
+    "qiskit-iqm": null
+  },
+  "qpu_submitted": false,
+  "hardware_decision": "NO-GO: physical results require review; no submission authorized by this audit",
+  "physical_routing_verified": false,
+  "scope": "logical-only",
+  "historical_reference_reported_by_uploaded_audit": {
+    "cz": 300,
+    "depth": 283
+  },
+  "preparation": {
+    "problem": "10-invoice",
+    "method": "warm-start-x",
+    "p": 1,
+    "seed": 42,
+    "penalty_gbp": 250.0,
+    "num_qubits": 14,
+    "variable_names": [
+      "A",
+      "B",
+      "C",
+      "D",
+      "E",
+      "F",
+      "G",
+      "H",
+      "I",
+      "J",
+      "s0",
+      "s1",
+      "s2",
+      "s3"
+    ],
+    "business_optimum": [
+      "A",
+      "B",
+      "F",
+      "G",
+      "H"
+    ],
+    "business_optimum_loss_gbp": 950,
+    "optimizer_success": true,
+    "optimizer_message": "Return from COBYLA because the trust region radius reaches its lower bound.",
+    "optimizer_calls": 53,
+    "optimized_parameters": [
+      -0.7437651622203449,
+      0.3003346566188639
+    ],
+    "optimized_expected_qubo_energy": 4662.501242887429,
+    "logical_depth": 79,
+    "logical_operation_counts": {
+      "cx": 182,
+      "rz": 105,
+      "ry": 14,
+      "rx": 14,
+      "measure": 14,
+      "barrier": 1
+    },
+    "relaxation_runtime_ms": 468.304062000243,
+    "optimizer_runtime_ms": 2278.8222249946557,
+    "preparation_runtime_ms": 2766.117619998113,
+    "relaxation_fractionality": 0.0
+  },
+  "preparation_note": "New preparation, optimized once and shared by both schedules; not a replay of the archived Q20 circuit.",
+  "classical_optimum": {
+    "paid_invoice_ids": [
+      "A",
+      "B",
+      "F",
+      "G",
+      "H"
+    ],
+    "spend_gbp": 5000,
+    "business_loss_gbp": 950
+  },
+  "basis_audit": {
+    "original": {
+      "basis_labels_restored": true,
+      "max_phase_error_vs_ising": 1.0675618501476112e-14
+    },
+    "round-robin": {
+      "basis_labels_restored": true,
+      "max_phase_error_vs_ising": 1.0633573612804405e-14
+    },
+    "basis_states_verified": 16384,
+    "max_phase_error_between_orders": 4.470285125465931e-15
+  },
+  "max_logical_state_error": 9.934984129320279e-17,
+  "logical": {
+    "original": {
+      "num_qubits": 14,
+      "depth_with_measurements": 79,
+      "depth_without_measurements": 78,
+      "two_qubit_gates": 182,
+      "operation_counts": {
+        "cx": 182,
+        "rz": 105,
+        "ry": 14,
+        "rx": 14,
+        "measure": 14,
+        "barrier": 1
+      },
+      "qpy": {
+        "filename": "original-logical.qpy",
+        "sha256": "260973280a26d016a4cb693bbc01637d32dec8be3e4d70b85a7751db4e94aa12"
+      }
+    },
+    "round-robin": {
+      "num_qubits": 14,
+      "depth_with_measurements": 43,
+      "depth_without_measurements": 42,
+      "two_qubit_gates": 182,
+      "operation_counts": {
+        "cx": 182,
+        "rz": 105,
+        "ry": 14,
+        "rx": 14,
+        "measure": 14,
+        "barrier": 1
+      },
+      "qpy": {
+        "filename": "round-robin-logical.qpy",
+        "sha256": "159b5db3b82570f921907327b4478829e0d6a321c8731454a858425322655845"
+      }
+    }
+  },
+  "routing": [],
+  "paired_deltas": []
+}

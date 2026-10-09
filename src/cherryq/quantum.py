@@ -173,16 +173,45 @@ def _apply_cost_unitary(
     circuit: QuantumCircuit,
     cost_operator: SparsePauliOp,
     gamma,
+    cost_order: str = "original",
 ) -> None:
-    """Apply exp(-i gamma H_C) for a diagonal Z/ZZ Ising Hamiltonian."""
+    """Apply a diagonal Z/ZZ cost layer; ordering changes only its schedule.
+
+    Identity terms are omitted as a global phase, as in the original builder.
+    Round-robin scheduling is opt-in and makes no physical routing guarantee.
+    """
+
+    if cost_order not in {"original", "round-robin"}:
+        raise ValueError("cost_order must be 'original' or 'round-robin'")
+    terms = []
 
     for pauli_term, coeff in zip(cost_operator.paulis, cost_operator.coeffs, strict=True):
+        label = pauli_term.to_label()
+        if set(label) - {"I", "Z"} or abs(complex(coeff).imag) > 1e-12:
+            raise ValueError("CherryQ expects real diagonal Z and ZZ cost terms")
         indices = [
             index
-            for index, label in enumerate(pauli_term.to_label()[::-1])
-            if label == "Z"
+            for index, axis in enumerate(label[::-1])
+            if axis == "Z"
         ]
         real_coeff = float(complex(coeff).real)
+        if len(indices) > 2:
+            raise ValueError("CherryQ expects only Z and ZZ cost terms")
+        terms.append((indices, real_coeff))
+
+    if cost_order == "round-robin":
+        # All Z/ZZ terms commute. Stable sorting also preserves duplicate terms.
+        pair_rank = {
+            pair: rank
+            for rank, layer in enumerate(round_robin_pair_layers(cost_operator.num_qubits))
+            for pair in layer
+        }
+        terms.sort(key=lambda term: (
+            -1 if len(term[0]) < 2 else pair_rank[tuple(term[0])],
+            tuple(term[0]),
+        ))
+
+    for indices, real_coeff in terms:
         if len(indices) == 1:
             circuit.rz(2 * gamma * real_coeff, indices[0])
         elif len(indices) == 2:
@@ -191,8 +220,24 @@ def _apply_cost_unitary(
             circuit.cx(indices[0], indices[1])
         elif len(indices) == 0:
             continue
-        else:
-            raise ValueError("CherryQ expects only Z and ZZ cost terms")
+
+
+def round_robin_pair_layers(n: int) -> list[list[tuple[int, int]]]:
+    """Partition every unordered pair into disjoint matchings (odd n supported)."""
+    if n < 1:
+        raise ValueError("n must be positive")
+    ring = list(range(n))
+    if n % 2:
+        ring.append(None)
+    layers = []
+    for _ in range(len(ring) - 1):
+        layers.append([
+            tuple(sorted((ring[i], ring[-1 - i])))
+            for i in range(len(ring) // 2)
+            if ring[i] is not None and ring[-1 - i] is not None
+        ])
+        ring = [ring[0], ring[-1], *ring[1:-1]]
+    return layers
 
 
 def build_warm_start_qaoa(
@@ -201,6 +246,7 @@ def build_warm_start_qaoa(
     warm_start_probabilities: Sequence[float],
     epsilon: float = 0.25,
     mixer: str = "matched",
+    cost_order: str = "original",
 ) -> tuple[QuantumCircuit, list, list]:
     """Build a warm-start circuit with either a matched or ordinary X mixer.
 
@@ -232,7 +278,7 @@ def build_warm_start_qaoa(
         circuit.ry(float(theta), qubit)
 
     for layer in range(p):
-        _apply_cost_unitary(circuit, cost_operator, gammas[layer])
+        _apply_cost_unitary(circuit, cost_operator, gammas[layer], cost_order)
         for qubit, theta in enumerate(thetas):
             if mixer == "matched":
                 # Egger et al. warm-start mixer, matching IBM's tutorial form.
