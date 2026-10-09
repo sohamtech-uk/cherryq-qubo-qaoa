@@ -62,6 +62,22 @@ The facade submits to a hardware-free mock, discards its random bit results,
 then returns local IQM/Aer noisy simulation results. It records the latter.
 Noisy runs cannot be claimed complete merely because an offline compile passed.
 
+## GitHub Actions execution
+
+`resonance-mock.yml` uses the existing `IQM_TOKEN` environment secret in
+**Preview**. The token is injected only into the account-check and simulation
+steps; it is never copied out or stored in artifacts. Production is unused.
+An inventory-only job must verify `garnet:mock` and facade architecture before
+the six schedule/routing-seed jobs can start. Each runs 1,000, 5,000 and 10,000
+shots and uploads nonsecret JSON/CSV/QPY checkpoints even after a failure.
+The workflow installs `requirements-resonance.txt` in an isolated Python 3.12
+runtime and uses `PYTHONPATH=src` instead of the general package dependencies.
+The `--schedules` filter divides the noisy grid; both ideal schedules are still
+checked for equivalence in every job. Routing seeds are not simulator seeds.
+The workflow runs on pushes affecting its runner/configuration on
+`feature/resonance-mock-comparison`, and also supports manual dispatch where
+GitHub makes it available. It does not deploy the CherryQ application.
+
 ## Metrics and interpretation
 
 Qiskit's rightmost measured bit is A, then B through J, then s0 through s3.

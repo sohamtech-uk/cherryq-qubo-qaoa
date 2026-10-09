@@ -126,6 +126,10 @@ def inventory_and_facade(output_dir):
         headers={"Authorization": "Bearer " + token}, timeout=30, allow_redirects=False,
     )
     if response.status_code != 200:
+        write_json(output_dir / "mock-inventory.json", {
+            "authenticated_api_inventory_verified": False,
+            "http_status": response.status_code, "physical_qpu_submitted": False,
+        })
         raise RuntimeError("Authenticated mock inventory failed; response body intentionally omitted")
     aliases = sorted(item["alias"] for item in response.json()["quantum_computers"])
     mocks = [alias for alias in aliases if alias.endswith(":mock")]
@@ -145,6 +149,7 @@ def inventory_and_facade(output_dir):
     inventory["facade_static_architecture_compatibility_verified"] = True
     inventory["mock_num_qubits"] = backend.num_qubits
     write_json(output_dir / "mock-inventory.json", inventory)
+    print(json.dumps(inventory), flush=True)
     return backend
 
 
@@ -166,9 +171,12 @@ def export_csv(path, rows):
 
 def run_comparison(output_dir, *, facade=False, local_compile=False,
                    shots=(1000, 5000, 10000), routing_seeds=(42, 7, 123),
-                   ideal_seeds=(42, 7, 123), repeats=1):
+                   ideal_seeds=(42, 7, 123), repeats=1,
+                   schedules=("original", "round-robin")):
     if not shots or min(shots) < 1000 or max(shots) > 20000 or repeats < 1:
         raise ValueError("Use 1000–20000 shots and at least one repeat")
+    if not schedules or not set(schedules) <= {"original", "round-robin"}:
+        raise ValueError("Unknown cost schedule")
     output_dir.mkdir(parents=True, exist_ok=False)
     problem, qubo, operator, circuits = frozen_circuits()
     classical = benchmark_classical(problem).as_dict()
@@ -196,6 +204,8 @@ def run_comparison(output_dir, *, facade=False, local_compile=False,
         "source_sha256": {str(p.relative_to(source_root)): checksum(p) for p in source_files},
         "physical_qpu_submitted": False, "qpu_submitted": False,
         "gamma": GAMMA, "beta": BETA, "p": 1, "logical_qubits": 14,
+        "requested_noisy_grid": {"schedules": schedules, "routing_seeds": routing_seeds,
+                                 "shots": shots, "repeats": repeats},
         "penalty_gbp": 250.0, "variable_names": qubo.variable_names,
         "warm_start_probabilities_before_clipping": WARM_START, "epsilon": 0.25,
         "preparation": "Reproduced verified relaxation (seed 42, 32 starts), frozen gamma/beta; no QAOA reoptimization",
@@ -254,6 +264,8 @@ def run_comparison(output_dir, *, facade=False, local_compile=False,
         write_json(output_dir / "iqm-garnet-error-profile.json", serializable(asdict(fake_backend.error_profile)))
         for seed in routing_seeds:
             for order, circuit in circuits.items():
+                if order not in schedules:
+                    continue
                 compiled = transpile_q20_for_audit(circuit, backend, seed)
                 validation = validate_routed(circuit, compiled, backend)
                 physical = circuit_metrics(compiled)
@@ -270,6 +282,11 @@ def run_comparison(output_dir, *, facade=False, local_compile=False,
                 for nshots in shots:
                     for repeat in range(repeats):
                         check_facade_target(backend)
+                        progress = {"stage": "IQM Resonance noisy facade", "schedule": order,
+                                    "routing_seed": seed, "shots": nshots, "repeat": repeat,
+                                    "target": MOCK_ALIAS, "physical_qpu_submitted": False}
+                        write_json(output_dir / "progress.json", {"status": "running", **progress})
+                        print(json.dumps({"status": "starting", **progress}), flush=True)
                         started = perf_counter()
                         # Never pass a misleading simulator seed to the stock facade.
                         job = backend.run(compiled, shots=nshots, use_timeslot=False)
@@ -289,6 +306,7 @@ def run_comparison(output_dir, *, facade=False, local_compile=False,
                         rows.append(sample)
                         write_json(output_dir / "comparison.json", report)
                         export_csv(output_dir / "comparison.csv", rows)
+                        write_json(output_dir / "progress.json", {"status": "completed_sample", **progress})
                         print(json.dumps({k: sample[k] for k in ("stage", "schedule", "routing_seed", "shots", *METRICS)}), flush=True)
         if facade:
             report["noisy_simulation"]["status"] = "completed"
@@ -306,15 +324,28 @@ def main():
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--facade", action="store_true", help="Execute only authenticated garnet:mock + facade_garnet")
     parser.add_argument("--local-compile", action="store_true", help="Compile offline for Garnet; no remote jobs or noisy samples")
+    parser.add_argument("--inventory-only", action="store_true", help="Authenticated mock inventory and facade architecture check; no jobs")
     parser.add_argument("--shots", nargs="+", type=int, default=[1000, 5000, 10000])
     parser.add_argument("--routing-seeds", nargs="+", type=int, default=[42, 7, 123])
     parser.add_argument("--repeats", type=int, default=1)
+    parser.add_argument("--schedules", nargs="+", choices=("original", "round-robin"),
+                        default=["original", "round-robin"])
     args = parser.parse_args()
     try:
-        run_comparison(args.output_dir, facade=args.facade, local_compile=args.local_compile,
-                       shots=tuple(args.shots), routing_seeds=tuple(args.routing_seeds), repeats=args.repeats)
+        if args.inventory_only:
+            args.output_dir.mkdir(parents=True, exist_ok=False)
+            inventory_and_facade(args.output_dir)
+        else:
+            run_comparison(args.output_dir, facade=args.facade, local_compile=args.local_compile,
+                           shots=tuple(args.shots), routing_seeds=tuple(args.routing_seeds),
+                           repeats=args.repeats, schedules=tuple(args.schedules))
     except Exception as exc:
         # SDK/network exceptions can contain sensitive request context: do not echo.
+        if args.output_dir.is_dir():
+            write_json(args.output_dir / "failure.json", {
+                "exception_class": type(exc).__name__, "physical_qpu_submitted": False,
+                "note": "Exception details omitted to protect credentials; inspect nonsecret checkpoints",
+            })
         print(f"Comparison stopped ({type(exc).__name__}); inspect saved nonsecret checkpoint. No physical QPU path exists.")
         return 1
     print(f"Saved comparison to {args.output_dir}. Physical QPU submissions: 0.")

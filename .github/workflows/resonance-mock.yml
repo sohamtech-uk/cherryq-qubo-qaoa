@@ -1,0 +1,95 @@
+name: CherryQ Resonance mock simulation
+
+on:
+  push:
+    branches: [feature/resonance-mock-comparison]
+    paths:
+      - .github/workflows/resonance-mock.yml
+      - requirements-resonance.txt
+      - src/cherryq/hardware/resonance_simulation.py
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cherryq-resonance-mock-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: src
+  PYTHONUNBUFFERED: '1'
+  OMP_NUM_THREADS: '2'
+  OPENBLAS_NUM_THREADS: '2'
+
+jobs:
+  inventory:
+    name: Verify authenticated mock inventory (no jobs)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-resonance.txt
+      - name: Install verified IQM runtime
+        run: python -m pip install -r requirements-resonance.txt
+      - name: Verify frozen checkpoint and mock-only guards
+        run: python -m pytest -q tests/test_resonance_simulation.py
+      - name: Inspect account mocks and verify facade architecture
+        env:
+          IQM_TOKEN: ${{ secrets.IQM_TOKEN }}
+        run: python -m cherryq.hardware.resonance_simulation --inventory-only --output-dir results/inventory
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resonance-mock-inventory
+          path: results/inventory/
+          if-no-files-found: warn
+          retention-days: 30
+
+  simulate:
+    name: ${{ matrix.schedule }} / route ${{ matrix.routing_seed }}
+    needs: inventory
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    environment: Preview
+    strategy:
+      fail-fast: false
+      matrix:
+        schedule: [original, round-robin]
+        routing_seed: [42, 7, 123]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-resonance.txt
+      - name: Install verified IQM runtime
+        run: python -m pip install -r requirements-resonance.txt
+      - name: Run frozen ideal and mock facade comparison
+        env:
+          IQM_TOKEN: ${{ secrets.IQM_TOKEN }}
+          CHERRYQ_SCHEDULE: ${{ matrix.schedule }}
+          CHERRYQ_ROUTING_SEED: ${{ matrix.routing_seed }}
+        run: >-
+          python -m cherryq.hardware.resonance_simulation
+          --facade --schedules "$CHERRYQ_SCHEDULE"
+          --routing-seeds "$CHERRYQ_ROUTING_SEED"
+          --shots 1000 5000 10000
+          --output-dir results/comparison
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resonance-${{ matrix.schedule }}-route-${{ matrix.routing_seed }}
+          path: results/comparison/
+          if-no-files-found: warn
+          retention-days: 30

@@ -1,0 +1,8 @@
+# Isolated reproduction of the verified LUMI/IQM runtime; use PYTHONPATH=src.
+# Do not combine with the general pyproject Qiskit >=2.5.2 requirement.
+iqm-client[qiskit]==34.0.2
+qiskit==2.1.2
+qiskit-aer==0.17.2
+numpy==2.4.6
+scipy==1.17.1
+pytest==9.1.1
