@@ -232,17 +232,29 @@ def audit(*, output_dir, logical_only=False, seeds=(42, 7, 123), maxiter=80,
             for name in backend.target.operation_names
         }
         payload["backend_calibration_set_id"] = str(getattr(backend, "calibration_set_id", None))
+        save()
         for seed in seeds:
             paired = {}
             for order, logical in circuits.items():
                 compiled = transpile(logical, backend=backend, optimization_level=3, seed_transpiler=seed)
-                verification = validate_routed(logical, compiled, backend)
                 metrics = circuit_metrics(compiled)
+                frozen = _freeze(compiled, output_dir / f"{order}-seed-{seed}-routed.qpy")
+                try:
+                    verification = validate_routed(logical, compiled, backend)
+                except Exception as exc:
+                    payload["failed_routing"] = {
+                        "order": order, "seed_transpiler": seed, **metrics,
+                        "error": f"{type(exc).__name__}: {exc}", "qpy": frozen,
+                        "qubits": [repr(q) for q in compiled.qubits],
+                        "layout": str(compiled.layout),
+                    }
+                    save()
+                    raise
                 paired[order] = metrics
                 payload["routing"].append({
                     "order": order, "seed_transpiler": seed, "optimization_level": 3,
                     **metrics, "verification": verification,
-                    "qpy": _freeze(compiled, output_dir / f"{order}-seed-{seed}-routed.qpy"),
+                    "qpy": frozen,
                 })
                 save()
             payload["paired_deltas"].append({
