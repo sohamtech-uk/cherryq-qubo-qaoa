@@ -1,0 +1,49 @@
+name: Retrieve existing Garnet result (read only)
+
+on:
+  push:
+    branches: [experiment/resonance-garnet-20261009]
+    paths:
+      - .github/workflows/resonance-garnet-retrieve.yml
+      - scripts/retrieve_real_garnet.py
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  retrieve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: Preview
+    env:
+      PYTHONPATH: src
+      PYTHONUNBUFFERED: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-resonance.txt
+      - run: python -m pip install -r requirements-resonance.txt
+      - uses: actions/download-artifact@v4
+        with:
+          github-token: ${{ github.token }}
+          run-id: 37920814628
+          name: cherryq-real-garnet-20261009
+          path: results/real-garnet
+      - name: Read existing job and compare complete circuit payloads with preflight archive
+        env:
+          IQM_TOKEN: ${{ secrets.IQM_TOKEN }}
+        run: python scripts/retrieve_real_garnet.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cherryq-real-garnet-completed
+          path: results/real-garnet/
+          retention-days: 90

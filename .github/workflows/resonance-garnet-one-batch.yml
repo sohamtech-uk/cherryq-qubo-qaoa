@@ -20,7 +20,8 @@ env:
 
 jobs:
   garnet:
-    if: github.run_attempt == 1 && github.event.head_commit.message == 'Authorize one real Garnet batch 20261009 (2 x 1000 shots)'
+    # Authorisation consumed: job 01a12051-58d8-7226-87ed-795caff11d3d completed.
+    if: ${{ false }}
     runs-on: ubuntu-latest
     timeout-minutes: 110
     environment: Preview
