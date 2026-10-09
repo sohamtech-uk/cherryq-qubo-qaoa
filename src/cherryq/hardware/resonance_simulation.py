@@ -11,6 +11,7 @@ import hashlib
 import importlib.metadata
 import json
 import os
+import traceback
 from pathlib import Path
 from datetime import datetime, timezone
 from time import perf_counter
@@ -136,6 +137,7 @@ def inventory_and_facade(output_dir):
     inventory = {"authenticated_api_inventory_verified": True, "mock_aliases": mocks,
                  "garnet_mock_available": MOCK_ALIAS in mocks, "physical_qpu_submitted": False}
     write_json(output_dir / "mock-inventory.json", inventory)
+    print(json.dumps(inventory), flush=True)
     if MOCK_ALIAS not in mocks:
         raise RuntimeError("garnet:mock is unavailable; refusing any physical or alternate target")
     provider = IQMProvider("https://resonance.iqm.tech", quantum_computer="garnet:mock")
@@ -342,10 +344,21 @@ def main():
     except Exception as exc:
         # SDK/network exceptions can contain sensitive request context: do not echo.
         if args.output_dir.is_dir():
-            write_json(args.output_dir / "failure.json", {
+            failure = {
                 "exception_class": type(exc).__name__, "physical_qpu_submitted": False,
                 "note": "Exception details omitted to protect credentials; inspect nonsecret checkpoints",
-            })
+                "frames": [{"file": Path(f.filename).name, "function": f.name, "line": f.lineno}
+                           for f in traceback.extract_tb(exc.__traceback__)],
+            }
+            # Only fixed SDK messages are allowed, never arbitrary exception text.
+            known_messages = {
+                "Quantum architecture of the server does not match the requested IQMFakeBackend.",
+                "Only the explicitly allowlisted Resonance garnet:mock is permitted",
+            }
+            if str(exc) in known_messages:
+                failure["known_error"] = str(exc)
+            write_json(args.output_dir / "failure.json", failure)
+            print(json.dumps(failure), flush=True)
         print(f"Comparison stopped ({type(exc).__name__}); inspect saved nonsecret checkpoint. No physical QPU path exists.")
         return 1
     print(f"Saved comparison to {args.output_dir}. Physical QPU submissions: 0.")
