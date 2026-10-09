@@ -30,6 +30,22 @@ def test_resolved_real_computer_is_rejected_before_execution():
         check_facade_target(backend)
 
 
+def test_label_adapter_preserves_iqm_noise_and_rejects_topology_changes():
+    pytest.importorskip("iqm.qiskit_iqm")
+    from iqm.qiskit_iqm.fake_backends.fake_garnet import IQMFakeGarnet
+    from cherryq.hardware.resonance_simulation import label_compatible_garnet
+    stock = IQMFakeGarnet()
+    sqa = stock._IQMFakeBackend__sqa
+    same_topology = sqa.model_copy(update={"dut_label": "M194_W0_P08_Z99"})
+    adapted, audit = label_compatible_garnet(same_topology)
+    assert adapted.validate_compatible_architecture(same_topology)
+    assert adapted.error_profile == stock.error_profile
+    assert audit["different_fields"] == ["dut_label"]
+    changed_topology = same_topology.model_copy(update={"connectivity": same_topology.connectivity[:-1]})
+    with pytest.raises(ValueError, match="topology differs"):
+        label_compatible_garnet(changed_topology)
+
+
 @pytest.fixture(scope="module")
 def prepared():
     return frozen_circuits()

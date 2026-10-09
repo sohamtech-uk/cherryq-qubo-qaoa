@@ -111,6 +111,35 @@ def summarise_counts(counts, qubo, problem):
     return result
 
 
+def label_compatible_garnet(remote_architecture):
+    """Accept only a DUT-label change, retaining the complete IQM noise profile.
+
+    IQM's equality test includes a specimen label as well as topology. The
+    model is representative: matching a label is not calibration equivalence.
+    No client, remote execution, or target selection occurs in this helper.
+    """
+    from iqm.qiskit_iqm.fake_backends.fake_garnet import IQMFakeGarnet
+    from iqm.qiskit_iqm.fake_backends.iqm_fake_backend import IQMFakeBackend
+    stock = IQMFakeGarnet()
+    stock_architecture = stock._IQMFakeBackend__sqa
+    old = stock_architecture.model_dump(mode="json")
+    new = remote_architecture.model_dump(mode="json")
+    differences = sorted(k for k in set(old) | set(new) if old.get(k) != new.get(k))
+    audit = {"different_fields": differences, "stock_model_dut_label": old["dut_label"],
+             "mock_dut_label": new["dut_label"], "noise_profile_modified": False,
+             "calibration_equivalence_claimed": False}
+    if not differences:
+        return stock, {**audit, "label_adapter_applied": False}
+    if differences != ["dut_label"]:
+        raise ValueError("Mock topology differs from the Garnet model; refusing label adapter")
+    adapted = IQMFakeBackend(remote_architecture, stock.error_profile,
+                             name="IQMFakeGarnet_label_compatible")
+    if adapted.error_profile != stock.error_profile:
+        raise RuntimeError("Label adapter unexpectedly changed the noise profile")
+    return adapted, {**audit, "label_adapter_applied": True,
+                     "qubits_resonators_connectivity_exactly_equal": True}
+
+
 def inventory_and_facade(output_dir):
     """Read only alias metadata, then connect only the authorized mock facade."""
     import requests
@@ -152,10 +181,23 @@ def inventory_and_facade(output_dir):
         "stock_facade_compatible": IQMFakeGarnet().validate_compatible_architecture(sqa),
         "iqm_client_version": importlib.metadata.version("iqm-client"),
     }
+    compatible_model, adapter_audit = label_compatible_garnet(sqa)
+    architecture_audit["metadata_adapter"] = adapter_audit
     write_json(output_dir / "mock-architecture.json", architecture_audit)
     print(json.dumps(architecture_audit), flush=True)
     provider = IQMProvider("https://resonance.iqm.tech", quantum_computer="garnet:mock")
-    backend = provider.get_backend("facade_garnet")
+    if adapter_audit["label_adapter_applied"]:
+        # Keep IQMFacadeBackend and its compatibility check unchanged. Only its
+        # local model's specimen label is updated after exact topology equality.
+        from iqm.qiskit_iqm.iqm_provider import facade_names
+        original_model = facade_names[FACADE_NAME]
+        try:
+            facade_names[FACADE_NAME] = compatible_model
+            backend = provider.get_backend("facade_garnet")
+        finally:
+            facade_names[FACADE_NAME] = original_model
+    else:
+        backend = provider.get_backend("facade_garnet")
     if not isinstance(backend, IQMFacadeBackend):
         raise RuntimeError("Expected IQMFacadeBackend")
     check_facade_target(backend)
@@ -164,6 +206,7 @@ def inventory_and_facade(output_dir):
     # IQMFacadeBackend itself verifies compatible static architectures.
     inventory["facade_static_architecture_compatibility_verified"] = True
     inventory["mock_num_qubits"] = backend.num_qubits
+    inventory["metadata_adapter"] = adapter_audit
     write_json(output_dir / "mock-inventory.json", inventory)
     print(json.dumps(inventory), flush=True)
     return backend

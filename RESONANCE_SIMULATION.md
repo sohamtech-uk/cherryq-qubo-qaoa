@@ -62,6 +62,26 @@ The facade submits to a hardware-free mock, discards its random bit results,
 then returns local IQM/Aer noisy simulation results. It records the latter.
 Noisy runs cannot be claimed complete merely because an offline compile passed.
 
+### Current Garnet mock label compatibility
+
+Authenticated inspection on 2026-10-09 found `emerald:mock`, `garnet:mock`, and
+`sirius:mock`. Garnet mock reports DUT `M194_W0_P08_Z99`; IQM's bundled Garnet
+noise model reports `M153_W0_P06_Z99`. All 20 qubit names, the empty resonator
+list, and all 30 connections match exactly. IQM Client 34.0.2's stock facade
+compares the complete architecture object and therefore rejects this label
+difference (the inspected 36.0.0 implementation does the same).
+
+The runner accepts only this kind of label-only mismatch. It constructs IQM's
+`IQMFakeBackend` with the returned mock architecture and the **unchanged**
+official Garnet error profile, temporarily registers that model for
+`facade_garnet`, and calls the requested `IQMProvider(...,
+quantum_computer="garnet:mock").get_backend("facade_garnet")`. The original
+registry entry is restored immediately. IQM's facade compatibility check and
+mock execution remain active. Any change to qubits, resonators or connectivity
+is rejected. Both labels and the adapter audit are saved with each run.
+This compatibility adapter does not establish current-device or Aalto
+calibration equivalence, and does not modify the gate-level noise model.
+
 ## GitHub Actions execution
 
 `resonance-mock.yml` uses the existing `IQM_TOKEN` environment secret in
