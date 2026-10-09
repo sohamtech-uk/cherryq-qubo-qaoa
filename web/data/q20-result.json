@@ -1,0 +1,42 @@
+{
+  "business_case": {
+    "cleared_cash_gbp": 8000,
+    "protected_cash_gbp": 5000,
+    "supplier_budget_gbp": 3000,
+    "classical_optimum": ["A", "B", "D"],
+    "supplier_spend_gbp": 3000,
+    "minimum_business_loss_gbp": 600
+  },
+  "q20": {
+    "slurm_job_id": "22651111",
+    "iqm_job_id": "01a11ccf-b3aa-73b2-9b0f-4f89ea6226b0",
+    "backend": "Aalto Q20 / radiance20",
+    "shots": 1000,
+    "logical_qubits": 8,
+    "usable_qubits": 19,
+    "logical_depth": 43,
+    "transpiled_depth": 120,
+    "logical_entangling_gates": "56 CX",
+    "transpiled_entangling_gates": "95 CZ",
+    "optimal_business_plan_probability": 0.048,
+    "business_feasible_probability": 0.857,
+    "qubo_feasible_probability": 0.133,
+    "optimal_qubo_state_probability": 0.006,
+    "best_feasible_loss_gbp": 600,
+    "qpu_execution_seconds": 1.361
+  },
+  "ideal": {
+    "method": "warm-start-x",
+    "p": 1,
+    "seed": 42,
+    "penalty_gbp": 500,
+    "gamma": -0.5258595261587256,
+    "beta": 0.26167867984612103,
+    "expected_qubo_energy": 2878.83371109914,
+    "optimal_business_plan_probability": 0.23406,
+    "business_feasible_probability": 0.82031,
+    "qubo_feasible_probability": 0.27041,
+    "optimal_qubo_state_probability": 0.13062
+  },
+  "claim": "Physical execution demonstrated. No quantum advantage claimed."
+}
