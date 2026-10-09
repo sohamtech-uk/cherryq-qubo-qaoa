@@ -140,6 +140,20 @@ def inventory_and_facade(output_dir):
     print(json.dumps(inventory), flush=True)
     if MOCK_ALIAS not in mocks:
         raise RuntimeError("garnet:mock is unavailable; refusing any physical or alternate target")
+    # Read nonsecret architecture metadata without executing a circuit.
+    from iqm.iqm_client import IQMClient
+    from iqm.qiskit_iqm.fake_backends.fake_garnet import IQMFakeGarnet
+    audit_client = IQMClient(RESONANCE_URL, quantum_computer=MOCK_ALIAS)
+    resolved = audit_client._iqm_server_client
+    require_mock_target(resolved.root_url, resolved.quantum_computer)
+    sqa = audit_client.get_static_quantum_architecture()
+    architecture_audit = {
+        "remote_mock_static_architecture": sqa.model_dump(mode="json"),
+        "stock_facade_compatible": IQMFakeGarnet().validate_compatible_architecture(sqa),
+        "iqm_client_version": importlib.metadata.version("iqm-client"),
+    }
+    write_json(output_dir / "mock-architecture.json", architecture_audit)
+    print(json.dumps(architecture_audit), flush=True)
     provider = IQMProvider("https://resonance.iqm.tech", quantum_computer="garnet:mock")
     backend = provider.get_backend("facade_garnet")
     if not isinstance(backend, IQMFacadeBackend):
