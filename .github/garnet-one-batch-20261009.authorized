@@ -1,0 +1,5 @@
+User-authorised experiment: cherryq-garnet-20261009-one-batch-2x1000
+Target: IQM Resonance garnet, ordinary IQMBackend only.
+Exactly one batch containing original and round-robin circuits, 1000 shots each.
+Submit only after both pass the current real-backend no-submit preflight.
+No Aalto Q20/LUMI, no facade, no mock execution, no rerun or second hardware job.

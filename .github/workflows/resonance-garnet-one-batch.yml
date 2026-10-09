@@ -1,0 +1,53 @@
+name: CherryQ real Garnet single authorised batch
+
+on:
+  push:
+    branches: [experiment/resonance-garnet-20261009]
+    paths: [.github/garnet-one-batch-20261009.authorized]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cherryq-real-garnet-20261009-one-batch
+  cancel-in-progress: false
+
+env:
+  PYTHONPATH: src
+  PYTHONUNBUFFERED: '1'
+  OMP_NUM_THREADS: '2'
+  OPENBLAS_NUM_THREADS: '2'
+
+jobs:
+  garnet:
+    if: github.run_attempt == 1 && github.event.head_commit.message == 'Authorize one real Garnet batch 20261009 (2 x 1000 shots)'
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    environment: Preview
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-resonance.txt
+      - name: Install the previously verified IQM runtime
+        run: python -m pip install -r requirements-resonance.txt
+      - name: Offline guards and circuit validation (no token)
+        run: python -m pytest -q tests/test_resonance_garnet.py
+      - name: No-submit preflight then exactly one real Garnet batch if both pass
+        env:
+          IQM_TOKEN: ${{ secrets.IQM_TOKEN }}
+        run: >-
+          python -m cherryq.hardware.resonance_garnet
+          --authorization cherryq-garnet-20261009-one-batch-2x1000
+          --output-dir results/real-garnet
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cherryq-real-garnet-20261009
+          path: results/real-garnet/
+          if-no-files-found: warn
+          retention-days: 90
