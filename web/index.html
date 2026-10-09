@@ -18,11 +18,12 @@
     </a>
     <nav>
       <a href="#demo">Demo</a>
+      <a href="#ten-invoice">10-invoice</a>
       <a href="#evidence">Evidence</a>
       <a href="#why-quantum">Why quantum</a>
       <a href="#roadmap">Roadmap</a>
     </nav>
-    <span class="hardware-pill"><i></i> Aalto Q20 verified</span>
+    <span class="hardware-pill"><i></i> Q20 + IQM simulation verified</span>
   </header>
 
   <main id="top">
@@ -37,8 +38,8 @@
         </div>
         <div class="claim">
           <strong>What we claim</strong>
-          <span>Verified business optimisation executed end-to-end on real superconducting quantum hardware.</span>
-          <em>No quantum advantage claimed.</em>
+          <span>5-invoice real Q20 proof + 10-invoice IQM Resonance noisy simulation.</span>
+          <em>Classical optimisation remains the benchmark. No quantum advantage claimed.</em>
         </div>
       </div>
       <div class="hero-visual" aria-label="CherryQ flow">
@@ -135,6 +136,78 @@
       </div>
     </section>
 
+
+    <section id="ten-invoice" class="section research-section">
+      <div class="shell">
+        <div class="section-heading">
+          <p class="eyebrow">10-invoice scaling checkpoint</p>
+          <h2>From a verified toy case to a harder treasury decision.</h2>
+          <p>We scaled CherryQ to 10 supplier invoices, kept exact/MILP as ground truth, froze one QAOA parameter set, and compared ideal behaviour with IQM Resonance noisy simulation.</p>
+        </div>
+
+        <div class="research-grid">
+          <article class="research-card">
+            <span class="research-kicker">Classical ground truth</span>
+            <h3>A + B + F + G + H</h3>
+            <p>Exact enumeration and MILP independently agree.</p>
+            <div class="research-stats">
+              <span><b>£5,000</b> spend</span>
+              <span><b>£950</b> minimum loss</span>
+              <span><b>1,024</b> business combinations</span>
+            </div>
+          </article>
+
+          <article class="research-card">
+            <span class="research-kicker">Ideal QAOA · p=1</span>
+            <h3>3.4683% optimum</h3>
+            <p>Both cost schedules produce the same ideal result distribution.</p>
+            <div class="research-stats">
+              <span><b>75.269%</b> business feasible</span>
+              <span><b>13.494%</b> QUBO feasible</span>
+              <span><b>14</b> logical qubits</span>
+            </div>
+          </article>
+
+          <article class="research-card sim">
+            <span class="research-kicker">IQM Resonance · garnet:mock</span>
+            <h3>~0.8% optimum</h3>
+            <p>Representative IQM Garnet noisy simulation using the official facade workflow.</p>
+            <div class="research-stats">
+              <span><b>18</b> noisy runs</span>
+              <span><b>96,000</b> total shots</span>
+              <span><b>£950</b> optimum recovered every run</span>
+            </div>
+          </article>
+
+          <article class="research-card route">
+            <span class="research-kicker">Aalto Q20 routing audit</span>
+            <h3>182 CX → 298 CZ minimum</h3>
+            <p>All six 14-qubit routing candidates passed target, readout and ideal-state validation.</p>
+            <div class="research-stats">
+              <span><b>78 → 42</b> logical depth</span>
+              <span><b>6/6</b> routed circuits pass</span>
+              <span><b>No</b> 10-invoice QPU submission</span>
+            </div>
+          </article>
+        </div>
+
+        <div class="evidence-flow" aria-label="CherryQ evidence flow">
+          <div class="flow-step complete"><small>1</small><strong>Exact / MILP</strong><span>A+B+F+G+H · £950</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step complete"><small>2</small><strong>Ideal QAOA</strong><span>3.4683% optimum</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step complete"><small>3</small><strong>IQM noisy sim</strong><span>~0.8% optimum</span></div>
+          <div class="flow-arrow">→</div>
+          <div class="flow-step future"><small>4</small><strong>Real 10-invoice QPU</strong><span>Future work</span></div>
+        </div>
+
+        <div class="sim-note">
+          <strong>Interpretation boundary</strong>
+          <span>These are representative IQM Garnet noisy simulations, not an exact Aalto Q20 calibration model. Real Q20 evidence below is from the independently verified 5-invoice experiment.</span>
+        </div>
+      </div>
+    </section>
+
     <section id="evidence" class="section shell">
       <div class="section-heading">
         <p class="eyebrow">Physical hardware evidence</p>
@@ -142,7 +215,7 @@
         <p>We froze the statevector-optimised parameters first. The QPU performed no variational optimisation.</p>
       </div>
 
-      <div class="evidence-grid">
+      <div class="evidence-grid evidence-grid-three">
         <div class="evidence-card">
           <div class="card-title"><span class="dot green"></span><strong>Verified ground truth</strong></div>
           <p>Exact enumeration and MILP independently agree.</p>
@@ -150,10 +223,16 @@
           <div class="mini-pair"><span>Spend <b>£3,000</b></span><span>Loss <b>£600</b></span></div>
         </div>
         <div class="evidence-card quantum">
-          <div class="card-title"><span class="dot cyan"></span><strong>Aalto Q20 · 1,000 shots</strong></div>
-          <p>Physical superconducting QPU, frozen warm-start-X p=1 circuit.</p>
+          <div class="card-title"><span class="dot cyan"></span><strong>Q20 run 1 · 1,000 shots</strong></div>
+          <p>Physical superconducting QPU, frozen p=1 circuit.</p>
           <div class="big-result">48 shots <small>4.8%</small></div>
-          <div class="mini-pair"><span>8 logical qubits</span><span>95 CZ · depth 120</span></div>
+          <div class="mini-pair"><span>95 CZ</span><span>depth 120</span></div>
+        </div>
+        <div class="evidence-card quantum">
+          <div class="card-title"><span class="dot cyan"></span><strong>Q20 run 2 · 1,000 shots</strong></div>
+          <p>Different physical layout, same frozen parameters.</p>
+          <div class="big-result">54 shots <small>5.4%</small></div>
+          <div class="mini-pair"><span>79 CZ</span><span>depth 111</span></div>
         </div>
       </div>
 
@@ -171,7 +250,7 @@
         <div><small>Frozen parameters</small><strong>γ −0.52586 · β 0.26168</strong></div>
         <div><small>Execution</small><strong>1.361 s QPU · 31 s Slurm</strong></div>
       </div>
-      <p class="disclaimer"><b>Interpretation:</b> CherryQ recovered the verified best business decision on real hardware. The probability fell from 23.41% ideal to 4.8% physical as the circuit grew to 95 CZ gates / depth 120. This demonstrates physical execution — not quantum advantage.</p>
+      <p class="disclaimer"><b>Interpretation:</b> Both independent physical Q20 runs recovered the same classically verified A+B+D optimum. P(A+B+D) was 4.8% and 5.4% versus 23.41% on the identical frozen ideal circuit. Different layouts mean the improvement cannot be attributed to gate count alone. This demonstrates repeatable physical execution — not quantum advantage.</p>
     </section>
 
     <section id="why-quantum" class="section quantum-why">
@@ -209,10 +288,10 @@
         <h2>From a fully verified toy case to treasury optimisation.</h2>
       </div>
       <div class="roadmap">
-        <div class="road active"><span>Now</span><strong>5 invoices</strong><p>Exact + MILP + ideal QAOA + physical Q20</p></div>
-        <div class="road"><span>Next</span><strong>40–50 invoices</strong><p>Realistic SME categories, dependencies and receipt scenarios</p></div>
+        <div class="road active"><span>Proven</span><strong>5 invoices</strong><p>Exact + MILP + ideal QAOA + two physical Q20 runs</p></div>
+        <div class="road active"><span>Now</span><strong>10 invoices</strong><p>Exact/MILP + ideal QAOA + IQM noisy simulation + Q20 routing</p></div>
+        <div class="road"><span>Next</span><strong>20–50 invoices</strong><p>Measure scaling with richer dependencies and receipt scenarios</p></div>
         <div class="road"><span>Product</span><strong>SME treasury</strong><p>Explainable recommendations using permissioned finance data</p></div>
-        <div class="road"><span>Future</span><strong>Enterprise</strong><p>Multi-entity, larger payable networks and working-capital constraints</p></div>
       </div>
       <div class="value-strip">
         <span>Reduce late fees & lost discounts</span>
