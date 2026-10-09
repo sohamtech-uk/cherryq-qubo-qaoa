@@ -127,3 +127,39 @@ Keep Exact/MILP -> Ideal QAOA -> Resonance noisy facade -> Aalto Q20 (future)
 as separate stages. No quantum advantage is claimed.
 
 Official workflow: https://docs.iqm.tech/iqm-client/user_guide_qiskit.html#running-a-quantum-circuit-on-a-facade-backend
+
+## Completed comparison (2026-10-09)
+
+[Run 37916961742](https://github.com/sohamtech-uk/cherryq-qubo-qaoa/actions/runs/37916961742)
+completed all 18 noisy runs: two schedules × three routing seeds ×
+1,000/5,000/10,000 shots, 96,000 noisy shots total. Every noisy run sampled the
+£950 optimum. No physical QPU was submitted.
+
+The following noisy rows pool the three 10,000-shot routing cases:
+
+| Stage / schedule | Optimal invoices | Business feasible | QUBO feasible | Optimal QUBO |
+|---|---:|---:|---:|---:|
+| Ideal, both | 3.4683% | 75.2690% | 13.4943% | 1.4739% |
+| IQM noisy, original | 0.8133% | 73.3800% | 7.8633% | 0.1700% |
+| IQM noisy, reordered | 0.8000% | 72.4200% | 7.5700% | 0.1667% |
+
+Reordered minus original optimal-invoice probability: -0.0133 percentage
+points; approximate stratified 95% shot-noise interval [-0.1565, +0.1298]
+percentage points. These samples do not establish an improvement.
+
+| Routing seed | Original depth | Reordered depth | Original CZ | Reordered CZ |
+|---:|---:|---:|---:|---:|
+| 42 | 348 | 249 | 284 | 289 |
+| 7 | 366 | 228 | 299 | 274 |
+| 123 | 390 | 204 | 288 | 279 |
+
+These are the actual authenticated-target compilations, distinct from the
+earlier offline preflight. Raw counts, JSON/CSV, QPY circuits and model/adapter
+audits are retained as the run's artifacts. `scripts/aggregate_resonance_results.py`
+rescored all raw counts against the existing repository interpreter, checked
+all 18 shot totals and metrics, and generated the combined report. All six
+native-target, measurement-layout and ideal-amplitude validations passed.
+Ten focused tests passed, and all six simulation runners used identical
+resolved dependency versions. Exact/MILP remains ground truth; Aalto Q20 is
+future work. This representative IQM simulation makes no quantum-advantage
+or Aalto-calibration-equivalence claim.

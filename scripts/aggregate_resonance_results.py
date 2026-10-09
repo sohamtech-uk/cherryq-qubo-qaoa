@@ -3,6 +3,7 @@ import argparse
 from collections import Counter, defaultdict
 import csv
 import json
+import math
 from pathlib import Path
 
 from cherryq.hardware.resonance_simulation import (
@@ -85,6 +86,22 @@ def main():
     result["source_workflow_run"] = "https://github.com/sohamtech-uk/cherryq-qubo-qaoa/actions/runs/37916961742"
     result["noisy_total_shots"] = sum(s["shots"] for s in result["samples"] if s["stage"] == "IQM Resonance noisy facade")
     assert result["noisy_total_shots"] == 96000
+    primary = [s for s in result["samples"]
+               if s["stage"] == "IQM Resonance noisy facade" and s["shots"] == 10000]
+    means = {order: sum(s[METRICS[0]] for s in primary if s["schedule"] == order) / 3
+             for order in ("original", "round-robin")}
+    difference = means["round-robin"] - means["original"]
+    standard_error = math.sqrt(sum(s[METRICS[0]] * (1 - s[METRICS[0]]) / s["shots"]
+                                   for s in primary)) / 3
+    interval = [difference - 1.959963984540054 * standard_error,
+                difference + 1.959963984540054 * standard_error]
+    result["primary_schedule_effect"] = {
+        "metric": METRICS[0], "shots_per_routing_case": 10000,
+        "difference_reordered_minus_original": difference,
+        "approximate_95_percent_shot_noise_interval": interval,
+        "method": "Independent binomial variance within each routing/schedule case; equal average of three routing strata; normal approximation",
+        "limitation": "Shot noise only for these fixed routed circuits and this representative model; not calibration uncertainty or a causal depth effect",
+    }
     rows = [{"stage": "Exact/MILP", "best_sampled_business_loss_gbp": 950}]
     for order, ideal in result["ideal"].items():
         rows.append({"stage": "Ideal statevector", "schedule": order,
@@ -136,6 +153,10 @@ def main():
     pairs = {r["schedule"]: r for r in aggregates if r["shots_per_routing_seed"] == 10000}
     delta = 100 * (pairs["round-robin"][METRICS[0]] - pairs["original"][METRICS[0]])
     text += ["", f"At 10,000 shots per routing case, the observed change in optimal-invoice probability is **{delta:+.4f} percentage points** (reordered minus original).",
+        f"The approximate 95% interval from shot noise within the three fixed routing cases is **[{100 * interval[0]:+.4f}, {100 * interval[1]:+.4f}] percentage points**. This uses independent binomial variances and a normal approximation; it excludes model/calibration uncertainty.",
+        ("This interval includes zero: these samples do not establish an improvement in optimal-invoice probability."
+         if interval[0] <= 0 <= interval[1] else
+         "The direction of the observed difference is resolved by this shot-noise calculation for these fixed circuits; this does not generalize to other layouts or hardware calibrations."),
         "This is a comparison of complete routed circuits. Changes in CZ count, placement and gate order accompany the depth change. The stock IQM model includes gate-duration relaxation/dephasing, depolarization and readout error, but no automatic idle-time scheduling noise; the experiment does not isolate a causal depth benefit.", "",
         "## Model, account and reproducibility", "",
         "Authenticated inventory: emerald:mock, garnet:mock and sirius:mock. The runner uses only garnet:mock with facade_garnet; IQM's remote mock results are discarded and replaced by its local Aer noisy results.",
