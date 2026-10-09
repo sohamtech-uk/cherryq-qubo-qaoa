@@ -15,6 +15,7 @@ from pathlib import Path
 
 import numpy as np
 from qiskit import QuantumCircuit, qpy, transpile
+from qiskit.circuit.library import CZGate
 from qiskit.quantum_info import Statevector
 
 from ..quantum import _apply_cost_unitary, build_warm_start_qaoa, qubo_to_ising
@@ -115,13 +116,23 @@ def validate_routed(logical, compiled, backend):
     """Validate target support, measurement mapping and ideal routed amplitudes."""
     if compiled.num_qubits > 22:
         raise ValueError("Routed statevector exceeds the audit's 22-qubit memory bound")
+    reversed_cz_loci = 0
     for item in compiled.data:
         if item.operation.name == "barrier":
             continue
         indices = tuple(compiled.find_bit(q).index for q in item.qubits)
-        if not backend.target.instruction_supported(
+        supported = backend.target.instruction_supported(
             operation_name=item.operation.name, qargs=indices,
-        ):
+        )
+        # IQM lists CZ calibration loci in one direction. CZ is symmetric,
+        # so the reverse locus denotes the same physical operation. Keep
+        # directional gates and absent couplings subject to the exact check.
+        if not supported and isinstance(item.operation, CZGate):
+            supported = backend.target.instruction_supported(
+                operation_name="cz", qargs=indices[::-1],
+            )
+            reversed_cz_loci += int(supported)
+        if not supported:
             raise RuntimeError(f"Unsupported target operation {item.operation.name} on {indices}")
     layout = compiled.layout.final_index_layout(filter_ancillas=True)
     if len(layout) != logical.num_qubits or len(set(layout)) != len(layout):
@@ -144,6 +155,7 @@ def validate_routed(logical, compiled, backend):
     if error > 1e-9:
         raise RuntimeError(f"Routed statevector validation failed: {error}")
     return {"target_operations_valid": True, "measurement_mapping_valid": True,
+            "symmetric_cz_reverse_locus_matches": reversed_cz_loci,
             "final_logical_to_physical": layout, "max_amplitude_error_up_to_global_phase": error}
 
 

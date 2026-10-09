@@ -86,3 +86,45 @@ def test_routed_validation_accounts_for_layout_and_rejects_wrong_readout():
     compiled.data[second] = b.replace(clbits=a.clbits)
     with pytest.raises(RuntimeError, match="Measurement mapping"):
         validate_routed(logical, compiled, backend)
+
+
+@pytest.mark.parametrize("gate", ["cz", "cx"])
+def test_iqm_single_direction_locus_accepts_only_symmetric_cz(gate):
+    backend = GenericBackendV2(
+        num_qubits=2, basis_gates=["rz", "sx", "x", gate],
+        coupling_map=[[0, 1]], seed=42,
+    )
+    logical = QuantumCircuit(2)
+    logical.h(0)
+    logical.ry(0.47, 1)
+    getattr(logical, gate)(0, 1)
+    logical.measure_all()
+    compiled = transpile(logical, backend, initial_layout=[0, 1], optimization_level=0)
+    for i, item in enumerate(compiled.data):
+        if item.operation.name == gate:
+            compiled.data[i] = item.replace(qubits=tuple(reversed(item.qubits)))
+    assert not backend.target.instruction_supported(operation_name=gate, qargs=(1, 0))
+    if gate == "cz":
+        result = validate_routed(logical, compiled, backend)
+        assert result["symmetric_cz_reverse_locus_matches"] == 1
+        assert result["max_amplitude_error_up_to_global_phase"] < 1e-10
+    else:
+        with pytest.raises(RuntimeError, match="Unsupported target operation cx"):
+            validate_routed(logical, compiled, backend)
+
+
+def test_symmetric_cz_still_rejects_missing_physical_coupling():
+    backend = GenericBackendV2(
+        num_qubits=3, basis_gates=["rz", "sx", "x", "cz"],
+        coupling_map=[[0, 1], [1, 2]], seed=42,
+    )
+    logical = QuantumCircuit(3)
+    logical.h(0)
+    logical.cz(0, 1)
+    logical.measure_all()
+    compiled = transpile(logical, backend, initial_layout=[0, 1, 2], optimization_level=0)
+    for i, item in enumerate(compiled.data):
+        if item.operation.name == "cz":
+            compiled.data[i] = item.replace(qubits=(compiled.qubits[0], compiled.qubits[2]))
+    with pytest.raises(RuntimeError, match="Unsupported target operation cz"):
+        validate_routed(logical, compiled, backend)
