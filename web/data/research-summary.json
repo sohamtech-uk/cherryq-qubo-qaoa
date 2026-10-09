@@ -1,0 +1,75 @@
+{
+  "generated_from": "feature/resonance-mock-comparison",
+  "ten_invoice": {
+    "exact_milp": {
+      "optimum": [
+        "A",
+        "B",
+        "F",
+        "G",
+        "H"
+      ],
+      "spend_gbp": 5000,
+      "minimum_loss_gbp": 950
+    },
+    "ideal": {
+      "optimal_business_plan_probability": 0.034683,
+      "business_feasible_probability": 0.75269,
+      "qubo_feasible_probability": 0.134943,
+      "optimal_qubo_state_probability": 0.014739
+    },
+    "resonance_mock": {
+      "backend": "garnet:mock",
+      "facade": "facade_garnet",
+      "noisy_runs": 18,
+      "total_shots": 96000,
+      "pooled_10000_shot_runs": {
+        "original": {
+          "optimal_business_plan_probability": 0.008133,
+          "business_feasible_probability": 0.7338,
+          "qubo_feasible_probability": 0.078633,
+          "optimal_qubo_state_probability": 0.0017
+        },
+        "reordered": {
+          "optimal_business_plan_probability": 0.008,
+          "business_feasible_probability": 0.7242,
+          "qubo_feasible_probability": 0.0757,
+          "optimal_qubo_state_probability": 0.001667
+        }
+      },
+      "every_run_recovered_minimum_loss": true,
+      "note": "Representative IQM Garnet noisy simulation; not exact Aalto Q20 calibration."
+    },
+    "aalto_q20_routing": {
+      "logical_qubits": 14,
+      "logical_cx": 182,
+      "minimum_physical_cz": 298,
+      "qpu_submitted": false
+    }
+  },
+  "five_invoice_real_q20": {
+    "optimum": [
+      "A",
+      "B",
+      "D"
+    ],
+    "minimum_loss_gbp": 600,
+    "runs": [
+      {
+        "shots": 1000,
+        "optimal_plan_probability": 0.048,
+        "optimal_plan_shots": 48,
+        "cz": 95,
+        "depth": 120
+      },
+      {
+        "shots": 1000,
+        "optimal_plan_probability": 0.054,
+        "optimal_plan_shots": 54,
+        "cz": 79,
+        "depth": 111
+      }
+    ]
+  },
+  "claim": "No quantum advantage claimed."
+}
