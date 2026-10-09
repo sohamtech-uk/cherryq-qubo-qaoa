@@ -84,6 +84,8 @@ def main():
     if complete:
         lines += [f"**One real hardware batch completed, with two circuits and 1,000 shots per circuit.** IQM job ID: `{hardware['iqm_job_id']}`.",
                   "This used an ordinary IQMBackend on real Resonance `garnet`. No facade was attached to hardware. No Aalto Q20/LUMI job or second hardware job was submitted.", ""]
+        if hardware.get("recovered_read_only"):
+            lines += ["The first analysis stopped on an SDK result-name mismatch after hardware completion. Read-only retrieval recovered the same job. Both complete circuit payloads matched the archived compiled circuits exactly; IQM Client 34.0.2's dictionary conversion explains its fallback names `circuit_0` and `circuit_1`. No resubmission was needed.", ""]
     else:
         lines += [f"**Hardware outcome: {hardware.get('preflight')}; results not available.**",
                   f"Submission attempted: {hardware.get('submission_attempted')}; IQM job ID: {hardware.get('iqm_job_id') or 'none'}.",
@@ -128,6 +130,7 @@ def main():
               "The rightmost count bit is A, followed by B–J and four slack bits. Optimal-invoice probability sums over all slack assignments. Business feasibility means invoice spend ≤ £5,000 and ignores slack. QUBO feasibility requires the budget equality including slack. Optimal QUBO probability counts the unique full 14-bit optimum `00000011100011`.", "",
               "**This is a real IQM hardware experiment, but it does not demonstrate quantum advantage.** The warm-start relaxation already encodes the classical optimum before epsilon-0.25 clipping; exact/MILP is the ground truth. No runtime or scaling advantage over classical methods has been established.", "",
               f"[Hardware workflow](https://github.com/sohamtech-uk/cherryq-qubo-qaoa/actions/runs/{hardware.get('github_run_id')}) · source commit `{hardware.get('source_commit')}`.",
+              f"[Verified read-only result retrieval](https://github.com/sohamtech-uk/cherryq-qubo-qaoa/actions/runs/{hardware.get('retrieval_workflow_run_id')}).",
               f"[Completed simulator workflow]({prior['source_workflow_run']}).", "",
               "[IQM backend documentation](https://docs.iqm.tech/iqm-client/api/iqm.qiskit_iqm.iqm_provider.IQMBackend.html) · [IQM provider documentation](https://docs.iqm.tech/iqm-client/api/iqm.qiskit_iqm.iqm_provider.IQMProvider.html).", "",
               "JSON preserves the raw hardware counts, provenance, preflight metadata, metrics, intervals and reference aggregates. The comparison CSV stores probabilities as fractions; the counts CSV contains every observed hardware bitstring. No IQM token or full run request is included."]
