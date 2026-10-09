@@ -112,6 +112,22 @@ def state_error(expected, actual):
     return float(np.max(np.abs(actual - phase * expected)))
 
 
+def transpile_q20_for_audit(logical, backend, seed):
+    """Use Qiskit's grid routing without IQM's resonator scheduling round trip.
+
+    IQM Client 34.0.2's default scheduling path changes qubit representation
+    even on a grid, and drops phases before measurements. The standard stage
+    preserves physical indexing and amplitudes while still compiling to the
+    live target's native gate set. Never apply this path to a MOVE architecture.
+    """
+    if "move" in backend.target.operation_names or getattr(
+        getattr(backend, "architecture", None), "computational_resonators", ()
+    ):
+        raise ValueError("This audit's standard scheduling requires a grid without resonators")
+    return transpile(logical, backend=backend, optimization_level=3,
+                     seed_transpiler=seed, scheduling_method="default")
+
+
 def validate_routed(logical, compiled, backend):
     """Validate target support, measurement mapping and ideal routed amplitudes."""
     if compiled.num_qubits > 22:
@@ -206,6 +222,8 @@ def audit(*, output_dir, logical_only=False, seeds=(42, 7, 123), maxiter=80,
         "hardware_decision": "NO-GO: physical results require review; no submission authorized by this audit",
         "physical_routing_verified": False,
         "scope": "logical-only" if logical_only else "current-Q20-target-transpilation-and-ideal-simulation",
+        "transpilation": {"optimization_level": 3, "scheduling_method": "default",
+                          "note": "Standard Qiskit scheduling preserves grid indices and pre-measurement phases."},
         "historical_reference_reported_by_uploaded_audit": {"cz": 300, "depth": 283},
         "preparation": preparation, "preparation_note":
             "New preparation, optimized once and shared by both schedules; not a replay of the archived Q20 circuit.",
@@ -236,7 +254,7 @@ def audit(*, output_dir, logical_only=False, seeds=(42, 7, 123), maxiter=80,
         for seed in seeds:
             paired = {}
             for order, logical in circuits.items():
-                compiled = transpile(logical, backend=backend, optimization_level=3, seed_transpiler=seed)
+                compiled = transpile_q20_for_audit(logical, backend, seed)
                 metrics = circuit_metrics(compiled)
                 frozen = _freeze(compiled, output_dir / f"{order}-seed-{seed}-routed.qpy")
                 try:

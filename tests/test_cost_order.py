@@ -100,6 +100,11 @@ def test_iqm_single_direction_locus_accepts_only_symmetric_cz(gate):
     getattr(logical, gate)(0, 1)
     logical.measure_all()
     compiled = transpile(logical, backend, initial_layout=[0, 1], optimization_level=0)
+    direct = validate_routed(logical, compiled, backend)
+    assert direct["target_operations_valid"]
+    assert direct["measurement_mapping_valid"]
+    assert direct["symmetric_cz_reverse_locus_matches"] == 0
+    assert direct["max_amplitude_error_up_to_global_phase"] < 1e-10
     for i, item in enumerate(compiled.data):
         if item.operation.name == gate:
             compiled.data[i] = item.replace(qubits=tuple(reversed(item.qubits)))

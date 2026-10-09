@@ -33,6 +33,32 @@ versions, source hashes, and QPY hashes. It verifies target gate support,
 invoice measurement order, and the ideal routed output state including idle
 ancillas and final qubit permutation.
 
+The audit explicitly uses Qiskit's standard `scheduling_method="default"`
+with the live IQM target. This is a grid-only path and rejects MOVE/resonator
+architectures. It retains phases before measurement for the amplitude audit.
+It does not use IQM's default scheduling round trip or discard terminal phases.
+Both schedules use exactly the same compilation configuration. Gate counts and
+depths must therefore be compared within this paired audit, not treated as a
+replay of the archived 300-CZ experiment.
+
+### LUMI runtime diagnosis, 9 October 2026
+
+Diagnostic Slurm job `22663749` inspected the actual installed Qiskit `2.1.2`
+and IQM Client `34.0.2`. All 257 two-qubit instructions failing direct target
+support were `_SingletonCZGate` instances with `isinstance(..., CZGate)=True`.
+Of these, 22 had a supported reverse locus and 235 had neither direction
+supported. The reported `(2, 0)` failure had both checks false. Consequently,
+changing the class check to a gate-name check would not resolve this failure;
+the CZ-only symmetry rule remains unchanged.
+
+The failure was reproduced offline using IQM's fake grid backend and the same
+Qiskit/IQM versions. The standard scheduling stage preserves target indexing,
+readout mapping, and ideal amplitudes. Optional offline integration tests cover
+this path and reject a resonator backend. No backend execution is used by these
+tests or by the audit. Failed live evidence is retained under
+`/scratch/project_462001763/cherryq/q20-ten/cost-order-audit-22663680`, and the
+full safe diagnostic is in the LUMI checkout's `iqm-runtime-inspect-22663749.out`.
+
 There is no QPU submission call in this command, and its output is deliberately
 not a `q20_ten --mode run` manifest. A fresh output directory is required so an
 older audit cannot be overwritten. Partial results remain marked unverified if
